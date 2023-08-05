@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TodoFormApp</string>
+    <string name="str_res_add_a_new_task">Add a new task</string>
+</resources>
