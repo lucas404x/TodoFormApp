@@ -1,34 +1,70 @@
 package com.noti0ns.todoformapp.adapters
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.noti0ns.todoformapp.R
 import com.noti0ns.todoformapp.data.models.Task
+import com.noti0ns.todoformapp.databinding.ItemTaskBinding
 
-class TaskAdapter(private val dataset: List<Task>) :
+class TaskAdapter(private val events: TaskClickEvent) :
     RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
+    private var dataset: MutableList<Task> = mutableListOf()
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val textView: TextView
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val binding: ItemTaskBinding
 
         init {
-            textView = view.findViewById(android.R.id.text1)
+            binding = ItemTaskBinding.bind(view)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false)
+            .inflate(R.layout.item_task, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        Log.i("TaskAdapter.onBindViewHolder", dataset[position].title)
-        holder.textView.text = dataset[position].title
+        val task = dataset[position]
+        holder.binding.constraintLayout.setOnClickListener {
+            events.onClickItem(position)
+        }
+        holder.binding.txtTaskTitle.text = task.title
+        holder.binding.txtFinishTaskDate.apply {
+            if (task.dateToFinish == null) {
+                visibility = View.GONE
+            } else {
+                text = task.dateToFinish.toString()
+                visibility = View.VISIBLE
+            }
+        }
+        holder.binding.btnIsTaskDone.apply {
+            isChecked = task.isDone
+            setOnClickListener {
+                Log.i(
+                    "TaskAdapter.onBindViewHolder.Task" + task.id.toString() + ": ",
+                    task.isDone.toString()
+                )
+                events.onCheckboxChanged(position)
+            }
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setList(tasks: List<Task>) {
+        Log.i("setList", "SetList called")
+        dataset = tasks.toMutableList()
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int = dataset.size
+
+    interface TaskClickEvent {
+        fun onCheckboxChanged(position: Int)
+        fun onClickItem(position: Int)
+    }
 }

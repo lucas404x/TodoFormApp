@@ -1,13 +1,16 @@
 package com.noti0ns.todoformapp.data.models
 
+import androidx.room.*
 import java.time.Instant
 
+@Entity
 data class Task(
-    val id: Int,
-    val title: String,
-    val dateCreated: Instant = Instant.now(),
-    val dateUpdated: Instant? = null,
-    val description: String = "",
-    val isDone: Boolean = false,
-    val targetFinishDate: Instant? = null,
+    @PrimaryKey var id: Int,
+    @ColumnInfo var title: String,
+    @ColumnInfo var description: String = "",
+    @ColumnInfo var isDone: Boolean = false,
+    @ColumnInfo("date_created") var dateCreated: Instant = Instant.now(),
+    @ColumnInfo("date_updated") var dateUpdated: Instant? = null,
+    @ColumnInfo("date_to_finish") var dateToFinish: Instant? = null,
+    @ColumnInfo("date_finished") var dateFinished: Instant? = null,
 )
