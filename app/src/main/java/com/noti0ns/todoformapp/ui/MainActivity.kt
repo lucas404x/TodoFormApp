@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
         viewModel.tasks.observe(this) {
             taskAdapter.setList(it)
         }
+
+        viewModel.loadTasks()
     }
 
     override fun onCheckboxChanged(position: Int) {

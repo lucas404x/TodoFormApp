@@ -1,24 +1,39 @@
 package com.noti0ns.todoformapp.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.noti0ns.todoformapp.data.models.Task
-import java.time.Instant
+import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
+import com.noti0ns.todoformapp.interfaces.TaskRepository
+import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
-    private val _tasks: List<Task> = listOf(
-        Task(1, title = "Task1"),
-        Task(2, title = "Task2"),
-        Task(3, title = "Task3"),
-        Task(4, title = "Task4", dateToFinish = Instant.now())
-    )
+    companion object {
+        private lateinit var taskRepo: TaskRepository
+    }
 
-    val tasks: LiveData<List<Task>> by lazy {
+    init {
+        taskRepo = RoomTaskRepository()
+    }
+
+    private var _tasks = listOf<Task>()
+
+    val tasks: MutableLiveData<List<Task>> by lazy {
         MutableLiveData(_tasks)
     }
 
+    fun loadTasks() {
+        viewModelScope.launch {
+            _tasks = taskRepo.getAll()
+            tasks.value = _tasks
+        }
+    }
+
     fun toggleTaskState(taskPos: Int) {
-        _tasks[taskPos].isDone = !_tasks[taskPos].isDone
+        viewModelScope.launch {
+            _tasks[taskPos].isDone = !_tasks[taskPos].isDone
+            taskRepo.update(_tasks[taskPos])
+        }
     }
 }

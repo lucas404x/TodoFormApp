@@ -3,11 +3,15 @@ package com.noti0ns.todoformapp.data.db
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.noti0ns.todoformapp.MyApp
-import com.noti0ns.todoformapp.data.daos.*
+import com.noti0ns.todoformapp.constants.Directories
+import com.noti0ns.todoformapp.data.db.converters.Converters
+import com.noti0ns.todoformapp.data.db.daos.*
 import com.noti0ns.todoformapp.data.models.Task
 
 @Database(entities = [Task::class], version = 1)
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
 
@@ -19,6 +23,8 @@ abstract class AppDatabase : RoomDatabase() {
             MyApp.getInstance(),
             AppDatabase::class.java,
             "sample.db"
+        ).createFromAsset(
+            Directories.database
         ).build().also {
             instance = it
         }

@@ -1,4 +1,4 @@
-package com.noti0ns.todoformapp.data.daos
+package com.noti0ns.todoformapp.data.db.daos
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -16,11 +16,11 @@ interface TaskDao {
     suspend fun getAll(): List<Task>
 
     @Insert
-    suspend fun save(task: Task): Task
+    suspend fun save(task: Task): Long
 
     @Update
-    suspend fun update(task: Task)
+    suspend fun update(task: Task): Int
 
     @Delete
-    suspend fun delete(id: Int)
+    suspend fun delete(task: Task)
 }
