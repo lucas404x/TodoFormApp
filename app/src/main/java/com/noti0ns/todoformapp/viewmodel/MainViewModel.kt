@@ -1,5 +1,6 @@
 package com.noti0ns.todoformapp.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,23 +18,17 @@ class MainViewModel : ViewModel() {
         taskRepo = RoomTaskRepository()
     }
 
-    private var _tasks = listOf<Task>()
+    private var _tasks = MutableLiveData<List<Task>>()
+    val tasks: LiveData<List<Task>> = _tasks
 
-    val tasks: MutableLiveData<List<Task>> by lazy {
-        MutableLiveData(_tasks)
+    fun loadTasks() = viewModelScope.launch {
+        _tasks.value = taskRepo.getAll()
     }
 
-    fun loadTasks() {
-        viewModelScope.launch {
-            _tasks = taskRepo.getAll()
-            tasks.value = _tasks
-        }
-    }
-
-    fun toggleTaskState(taskPos: Int) {
-        viewModelScope.launch {
-            _tasks[taskPos].isDone = !_tasks[taskPos].isDone
-            taskRepo.update(_tasks[taskPos])
+    fun toggleTaskState(taskPos: Int) = viewModelScope.launch {
+        _tasks.value?.get(taskPos)?.let {
+            it.isDone = !it.isDone
+            taskRepo.update(it)
         }
     }
 }

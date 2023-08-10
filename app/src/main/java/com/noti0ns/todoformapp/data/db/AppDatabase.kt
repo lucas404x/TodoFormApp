@@ -1,5 +1,6 @@
 package com.noti0ns.todoformapp.data.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -10,7 +11,11 @@ import com.noti0ns.todoformapp.data.db.converters.Converters
 import com.noti0ns.todoformapp.data.db.daos.*
 import com.noti0ns.todoformapp.data.models.Task
 
-@Database(entities = [Task::class], version = 1)
+@Database(
+    entities = [Task::class],
+    version = 1_001,
+    autoMigrations = [AutoMigration(from = 1, to = 1_001)]
+)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao

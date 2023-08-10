@@ -6,20 +6,11 @@ import java.time.Instant
 @Entity
 data class Task(
     @PrimaryKey var id: Int,
-    @ColumnInfo(typeAffinity = ColumnInfo.TEXT) var title: String,
-    @ColumnInfo(typeAffinity = ColumnInfo.TEXT) var description: String?,
-    @ColumnInfo("is_done", typeAffinity = ColumnInfo.INTEGER) var isDone: Boolean = false,
-    @ColumnInfo(
-        "date_created",
-        typeAffinity = ColumnInfo.INTEGER
-    ) var dateCreated: Instant = Instant.now(),
-    @ColumnInfo("date_updated", typeAffinity = ColumnInfo.INTEGER) var dateUpdated: Instant? = null,
-    @ColumnInfo(
-        "date_to_finish",
-        typeAffinity = ColumnInfo.INTEGER
-    ) var dateToFinish: Instant? = null,
-    @ColumnInfo(
-        "date_finished",
-        typeAffinity = ColumnInfo.INTEGER
-    ) var dateFinished: Instant? = null,
+    @ColumnInfo var title: String,
+    @ColumnInfo var description: String?,
+    @ColumnInfo("is_done") var isDone: Boolean = false,
+    @ColumnInfo("date_created") var dateCreated: Instant = Instant.now(),
+    @ColumnInfo("date_updated") var dateUpdated: Instant? = null,
+    @ColumnInfo("date_to_finish") var dateToFinish: Instant? = null,
+    @ColumnInfo("date_finished") var dateFinished: Instant? = null,
 )

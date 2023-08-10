@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
 
     private val getContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            Log.i("MainActivity.getContent", it.resultCode.toString())
+            Log.i("MainActivity.getContent.ResultCode: ", it.resultCode.toString())
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
