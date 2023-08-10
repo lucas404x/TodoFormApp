@@ -1,9 +1,12 @@
 package com.noti0ns.todoformapp.data.models
 
+import android.os.Parcelable
 import androidx.room.*
+import kotlinx.parcelize.Parcelize
 import java.time.Instant
 
 @Entity
+@Parcelize
 data class Task(
     @PrimaryKey var id: Int,
     @ColumnInfo var title: String,
@@ -13,4 +16,4 @@ data class Task(
     @ColumnInfo("date_updated") var dateUpdated: Instant? = null,
     @ColumnInfo("date_to_finish") var dateToFinish: Instant? = null,
     @ColumnInfo("date_finished") var dateFinished: Instant? = null,
-)
+) : Parcelable

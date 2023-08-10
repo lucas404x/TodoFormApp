@@ -31,7 +31,7 @@ class TaskAdapter(private val events: TaskClickEvent) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val task = dataset[position]
         holder.binding.constraintLayout.setOnClickListener {
-            events.onClickItem(position)
+            events.onClickItem(task)
         }
         holder.binding.txtTaskTitle.text = task.title
         holder.binding.txtFinishTaskDate.apply {
@@ -65,6 +65,6 @@ class TaskAdapter(private val events: TaskClickEvent) :
 
     interface TaskClickEvent {
         fun onCheckboxChanged(position: Int)
-        fun onClickItem(position: Int)
+        fun onClickItem(task: Task)
     }
 }
