@@ -12,7 +12,7 @@ import com.noti0ns.todoformapp.databinding.ItemTaskBinding
 
 class TaskAdapter(private val events: TaskClickEvent) :
     RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
-    private var dataset: MutableList<Task> = mutableListOf()
+    private var dataset: List<Task> = listOf()
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding: ItemTaskBinding
@@ -35,10 +35,10 @@ class TaskAdapter(private val events: TaskClickEvent) :
         }
         holder.binding.txtTaskTitle.text = task.title
         holder.binding.txtFinishTaskDate.apply {
-            if (task.dateToFinish == null) {
+            if (task.dueDate == null) {
                 visibility = View.GONE
             } else {
-                text = task.dateToFinish.toString()
+                text = task.dueDate.toString()
                 visibility = View.VISIBLE
             }
         }
@@ -57,7 +57,7 @@ class TaskAdapter(private val events: TaskClickEvent) :
     @SuppressLint("NotifyDataSetChanged")
     fun setList(tasks: List<Task>) {
         Log.i("setList", "SetList called")
-        dataset = tasks.toMutableList()
+        dataset = tasks
         notifyDataSetChanged()
     }
 

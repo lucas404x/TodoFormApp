@@ -6,10 +6,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.noti0ns.todoformapp.R
 import com.noti0ns.todoformapp.data.models.Task
+import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
 
 class TaskActivity : AppCompatActivity() {
+    private lateinit var _binding: ActivityTaskBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        _binding = ActivityTaskBinding.inflate(layoutInflater)
         loadTask()
         setContentView(R.layout.activity_task)
     }
@@ -20,8 +24,6 @@ class TaskActivity : AppCompatActivity() {
         } else {
             intent.getParcelableExtra("EXTRA_TASK")
         }
-        task?.let {
-            title = task.title
-        }
+        title = task?.title ?: "Untitled"
     }
 }

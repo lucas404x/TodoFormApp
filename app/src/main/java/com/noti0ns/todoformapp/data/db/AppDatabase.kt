@@ -2,9 +2,11 @@ package com.noti0ns.todoformapp.data.db
 
 import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.RenameColumn
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.AutoMigrationSpec
 import com.noti0ns.todoformapp.MyApp
 import com.noti0ns.todoformapp.constants.Directories
 import com.noti0ns.todoformapp.data.db.converters.Converters
@@ -13,11 +15,17 @@ import com.noti0ns.todoformapp.data.models.Task
 
 @Database(
     entities = [Task::class],
-    version = 1_001,
-    autoMigrations = [AutoMigration(from = 1, to = 1_001)]
+    version = 1_002,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 1_001),
+        AutoMigration(from = 1_001, to = 1_002, spec = AppDatabase.MyAutoMigration::class),
+    ]
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
+    @RenameColumn("Task", "date_to_finish", "due_date")
+    class MyAutoMigration : AutoMigrationSpec
+
     abstract fun taskDao(): TaskDao
 
     companion object {

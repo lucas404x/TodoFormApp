@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">TodoFormApp</string>
     <string name="str_res_add_a_new_task">Add a new task</string>
+    <string name="inp_untitled_txt">Untitled</string>
+    <string name="inp_description_txt">Description</string>
+    <string name="str_btn_save_task_changes">Save</string>
+    <string name="inp_due_date_task">Due Date</string>
 </resources>
