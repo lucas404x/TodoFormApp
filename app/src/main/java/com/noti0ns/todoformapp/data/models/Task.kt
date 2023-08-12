@@ -10,10 +10,12 @@ import java.time.Instant
 data class Task(
     @PrimaryKey var id: Int,
     @ColumnInfo var title: String,
-    @ColumnInfo var description: String?,
+    @ColumnInfo var description: String? = null,
     @ColumnInfo("is_done") var isDone: Boolean = false,
     @ColumnInfo("date_created") var dateCreated: Instant = Instant.now(),
     @ColumnInfo("date_updated") var dateUpdated: Instant? = null,
     @ColumnInfo("due_date") var dueDate: Instant? = null,
     @ColumnInfo("date_finished") var dateFinished: Instant? = null,
-) : Parcelable
+) : Parcelable {
+    constructor() : this(0, "")
+}

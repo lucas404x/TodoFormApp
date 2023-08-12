@@ -21,7 +21,7 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inp_title_task_field"
+                android:id="@+id/inp_title_task_layout"
                 style="?attr/textInputFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -35,13 +35,14 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inp_title_task_field"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_description_task_field"
+                android:id="@+id/input_description_task_layout"
                 style="?attr/textInputFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,16 +50,17 @@
                 android:hint="@string/inp_description_txt"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inp_title_task_field">
+                app:layout_constraintTop_toBottomOf="@+id/inp_title_task_layout">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_description_task_field"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:gravity="top"
                     android:inputType="textMultiLine"
-                    android:minLines="5"
                     android:maxLines="15"
+                    android:minLines="5"
                     android:overScrollMode="always"
                     android:scrollbarStyle="insideInset"
                     android:scrollbars="vertical"
@@ -67,7 +69,7 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inp_due_date_task"
+                android:id="@+id/inp_due_date_task_layout"
                 style="?attr/textInputFilledStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -77,16 +79,17 @@
                 app:startIconDrawable="@drawable/baseline_access_time_24"
                 app:startIconTint="?colorPrimary"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/input_description_task_field">
+                app:layout_constraintTop_toBottomOf="@+id/input_description_task_layout">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inp_due_date_task_field"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:hint="@string/inp_due_date_task"
                     android:clickable="true"
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    android:hint="@string/inp_due_date_task"
                     android:textColorHint="@android:color/transparent" />
             </com.google.android.material.textfield.TextInputLayout>
 
