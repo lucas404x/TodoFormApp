@@ -23,8 +23,7 @@ class RoomTaskRepository(private val dispatcher: CoroutineDispatcher = Dispatche
 
     override suspend fun save(task: Task): Task = withContext(dispatcher) {
         taskDao.save(task).let {
-            task.id = it.toInt()
-            task
+            task.copy(id = it.toInt())
         }
     }
 

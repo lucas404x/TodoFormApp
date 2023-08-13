@@ -18,17 +18,18 @@ class MainViewModel : ViewModel() {
         taskRepo = RoomTaskRepository()
     }
 
-    private var _tasks = MutableLiveData<List<Task>>()
-    val tasks: LiveData<List<Task>> = _tasks
+    private var _tasks = MutableLiveData<MutableList<Task>>()
+    val tasks: LiveData<MutableList<Task>> = _tasks
 
     fun loadTasks() = viewModelScope.launch {
-        _tasks.value = taskRepo.getAll()
+        _tasks.value = taskRepo.getAll().toMutableList()
     }
 
     fun toggleTaskState(taskPos: Int) = viewModelScope.launch {
         _tasks.value?.get(taskPos)?.let {
-            it.isDone = !it.isDone
-            taskRepo.update(it)
+            val task = it.copy(isDone = !it.isDone)
+            taskRepo.update(task)
+            _tasks.value?.set(taskPos, task)
         }
     }
 }

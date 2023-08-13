@@ -18,21 +18,30 @@ class TaskActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityTaskBinding.inflate(layoutInflater)
+        setupBindings()
+        setupListeners()
         loadTask()
-
-        _binding.apply {
-            inpTitleTaskField.doOnTextChanged { text, _, _, _ -> onTitleChanged(text.toString()) }
-        }
-
-        _viewModel.task.observe(this) {
-            onTitleChanged(it.title)
-        }
-
-        setContentView(R.layout.activity_task)
+        setContentView(_binding.root)
     }
 
-    private fun onTitleChanged(title: String) {
-        this.title = title.ifBlank { "Untitled" }
+    private fun setupBindings() {
+        _binding.apply {
+            inpTitleTaskField.doOnTextChanged { text, _, _, _ ->
+                title = text.toString().ifBlank { "Untitled" }
+            }
+        }
+    }
+
+    private fun setupListeners() {
+        _viewModel.titleState.observe(this) { error ->
+            _binding.inpTitleTaskField.error = error
+        }
+        _viewModel.descriptionState.observe(this) { error ->
+            _binding.inputDescriptionTaskField.error = error
+        }
+        _viewModel.dueDateState.observe(this) { error ->
+            _binding.inpDueDateTaskField.error = error
+        }
     }
 
     private fun loadTask() {
@@ -41,6 +50,16 @@ class TaskActivity : AppCompatActivity() {
         } else {
             intent.getParcelableExtra("EXTRA_TASK")
         }
-        task?.let { _viewModel.loadTask(it) }
+        task?.let {
+            _viewModel.onLoadTask(it)
+            setInitialTaskData(it)
+        }
+        title = task?.title.orEmpty().ifEmpty { "Untitled" }
+    }
+
+    private fun setInitialTaskData(task: Task) {
+        _binding.inpTitleTaskField.setText(task.title)
+        _binding.inputDescriptionTaskField.setText(task.description)
+        _binding.inpDueDateTaskField.setText(task.dueDate.toString())
     }
 }
