@@ -18,21 +18,21 @@ class TaskViewModel : ViewModel() {
     }
 
 
-    private val _titleState = MutableLiveData<String?>(null)
-    val titleState: LiveData<String?> = _titleState
+    private val _titleState = MutableLiveData<FieldFormState<String>>(FieldFormState())
+    val titleState: LiveData<FieldFormState<String>> = _titleState
 
-    private val _descriptionState = MutableLiveData<String?>(null)
-    val descriptionState: LiveData<String?> = _descriptionState
+    private val _descriptionState = MutableLiveData<FieldFormState<String>>(FieldFormState())
+    val descriptionState: LiveData<FieldFormState<String>> = _descriptionState
 
-    private val _dueDateState = MutableLiveData<String?>(null)
-    val dueDateState: LiveData<String?> = _dueDateState
+    private val _dueDateState = MutableLiveData<FieldFormState<Instant>>(FieldFormState())
+    val dueDateState: LiveData<FieldFormState<Instant>> = _dueDateState
 
     private var _task = Task()
 
     fun onLoadTask(task: Task) = task.apply {
-        onTitleChanged(title)
-        onDescriptionChanged(description)
-        onDueDateChanged(dueDate)
+        _titleState.value = FieldFormState(task.title)
+        _descriptionState.value = FieldFormState(task.description)
+        _dueDateState.value = FieldFormState(task.dueDate)
     }.also {
         _task = it
     }
@@ -47,20 +47,30 @@ class TaskViewModel : ViewModel() {
 
     private fun onTitleChanged(title: String) {
         _task = _task.copy(title = title)
-        _titleState.value = if (title.isBlank()) "The title is required" else null
+        _titleState.value = _titleState.value?.copy(
+            title,
+            if (title.isBlank()) "The title is required" else null
+        )
     }
 
     private fun onDescriptionChanged(description: String?) {
         _task = _task.copy(description = description)
+        _descriptionState.value = _descriptionState.value?.copy(description)
     }
 
     private fun onDueDateChanged(dueDate: Instant?) {
         _task = _task.copy(dueDate = dueDate)
+        _dueDateState.value = _dueDateState.value?.copy(dueDate)
     }
 
     private fun onSubmitTask() {
 
     }
+}
+
+data class FieldFormState<T>(val data: T?, val error: String?) {
+    constructor() : this(null, null)
+    constructor(data: T?) : this(data, null)
 }
 
 sealed class TaskChangeEvent {
