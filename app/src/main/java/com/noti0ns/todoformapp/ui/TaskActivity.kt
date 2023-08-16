@@ -5,13 +5,19 @@ import android.app.TimePickerDialog
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
-import com.noti0ns.todoformapp.viewmodel.TaskChangeEvent
+import com.noti0ns.todoformapp.viewmodel.TaskUiState
+import com.noti0ns.todoformapp.viewmodel.TaskViewModelEvent
 import com.noti0ns.todoformapp.viewmodel.TaskViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 class TaskActivity : AppCompatActivity() {
@@ -32,13 +38,19 @@ class TaskActivity : AppCompatActivity() {
     private fun setupBindings() {
         _binding.apply {
             inpTitleTaskField.doOnTextChanged { text, _, _, _ ->
-                _viewModel.onInvokeEvent(TaskChangeEvent.TitleChanged(text.toString()))
+                _viewModel.onInvokeEvent(TaskViewModelEvent.TitleChanged(text.toString()))
             }
             inputDescriptionTaskField.doOnTextChanged { text, _, _, _ ->
-                _viewModel.onInvokeEvent(TaskChangeEvent.DescriptionChanged(text.toString()))
+                _viewModel.onInvokeEvent(TaskViewModelEvent.DescriptionChanged(text.toString()))
             }
             inpDueDateTaskField.setOnClickListener {
                 showDueDateDatePicker()
+            }
+            btnClearDueDate.setOnClickListener {
+                _viewModel.onInvokeEvent(TaskViewModelEvent.DueDateChanged(null))
+            }
+            btnSaveTaskChanges.setOnClickListener {
+                _viewModel.onInvokeEvent(TaskViewModelEvent.SubmitTask)
             }
         }
     }
@@ -58,7 +70,7 @@ class TaskActivity : AppCompatActivity() {
             datePickerListener,
             _calendar.get(Calendar.YEAR),
             _calendar.get(Calendar.MONTH),
-            _calendar.get(Calendar.DAY_OF_MONTH)
+            _calendar.get(Calendar.DAY_OF_MONTH),
         ).show()
     }
 
@@ -80,11 +92,26 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun setDueDate() = _calendar.apply {
-        _viewModel.onInvokeEvent(TaskChangeEvent.DueDateChanged(toInstant()))
-        clear()
+        _viewModel.onInvokeEvent(TaskViewModelEvent.DueDateChanged(toInstant()))
+        val currentDate = Instant.now().atZone(ZoneId.systemDefault())
+        set(
+            currentDate.year,
+            currentDate.monthValue,
+            currentDate.dayOfMonth,
+            currentDate.minute,
+            currentDate.second
+        )
     }
 
     private fun setupListeners() {
+        _viewModel.uiState.observe(this) {
+            when (it) {
+                TaskUiState.INITIAL -> {}
+                TaskUiState.LOADING -> _binding.progressBarTaskState.visibility = View.VISIBLE
+                TaskUiState.LOADED -> _binding.progressBarTaskState.visibility = View.GONE
+                TaskUiState.FINISHED -> finish()
+            }
+        }
         _viewModel.titleState.observe(this) {
             title = it.data.orEmpty().ifBlank { "Untitled" }
             if (it.error.orEmpty().isNotBlank()) {
@@ -98,7 +125,20 @@ class TaskActivity : AppCompatActivity() {
         }
         _viewModel.dueDateState.observe(this) {
             _binding.inpDueDateTaskField.apply {
-                setText(if (it.data == null) "" else it.data.toString())
+                val dueDate = when (it.data) {
+                    null -> {
+                        _binding.btnClearDueDate.visibility = View.GONE
+                        ""
+                    }
+
+                    else -> {
+                        _binding.btnClearDueDate.visibility = View.VISIBLE
+                        DateTimeFormatter.ofPattern("dd/mm/yyyy HH:mm").format(
+                            ZonedDateTime.ofInstant(it.data, ZoneId.systemDefault())
+                        )
+                    }
+                }
+                setText(dueDate)
                 if (it.error.orEmpty().isNotBlank()) {
                     error = it.error
                 }

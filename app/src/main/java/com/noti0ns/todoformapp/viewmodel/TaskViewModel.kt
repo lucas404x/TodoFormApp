@@ -3,9 +3,12 @@ package com.noti0ns.todoformapp.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
 import com.noti0ns.todoformapp.interfaces.TaskRepository
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Instant
 
 class TaskViewModel : ViewModel() {
@@ -17,7 +20,6 @@ class TaskViewModel : ViewModel() {
         }
     }
 
-
     private val _titleState = MutableLiveData<FieldFormState<String>>(FieldFormState())
     val titleState: LiveData<FieldFormState<String>> = _titleState
 
@@ -27,22 +29,27 @@ class TaskViewModel : ViewModel() {
     private val _dueDateState = MutableLiveData<FieldFormState<Instant>>(FieldFormState())
     val dueDateState: LiveData<FieldFormState<Instant>> = _dueDateState
 
+    private val _uiState = MutableLiveData(TaskUiState.INITIAL)
+    val uiState: LiveData<TaskUiState> = _uiState
+
     private var _task = Task()
 
     fun onLoadTask(task: Task) = task.apply {
+        _uiState.value = TaskUiState.LOADING
         _titleState.value = FieldFormState(task.title)
         _descriptionState.value = FieldFormState(task.description)
         _dueDateState.value = FieldFormState(task.dueDate)
     }.also {
         _task = it
+        _uiState.value = TaskUiState.LOADED
     }
 
 
-    fun onInvokeEvent(event: TaskChangeEvent) = when (event) {
-        is TaskChangeEvent.TitleChanged -> onTitleChanged(event.title)
-        is TaskChangeEvent.DescriptionChanged -> onDescriptionChanged(event.description)
-        is TaskChangeEvent.DueDateChanged -> onDueDateChanged(event.dueDate)
-        TaskChangeEvent.SubmitTask -> onSubmitTask()
+    fun onInvokeEvent(event: TaskViewModelEvent) = when (event) {
+        is TaskViewModelEvent.TitleChanged -> onTitleChanged(event.title)
+        is TaskViewModelEvent.DescriptionChanged -> onDescriptionChanged(event.description)
+        is TaskViewModelEvent.DueDateChanged -> onDueDateChanged(event.dueDate)
+        TaskViewModelEvent.SubmitTask -> onSubmitTask()
     }
 
     private fun onTitleChanged(title: String) {
@@ -64,7 +71,15 @@ class TaskViewModel : ViewModel() {
     }
 
     private fun onSubmitTask() {
-
+        viewModelScope.launch {
+            _uiState.value = TaskUiState.LOADING
+            if (_task.id == 0) {
+                taskRepo.save(_task)
+            } else {
+                taskRepo.update(_task)
+            }
+            _uiState.value = TaskUiState.FINISHED
+        }
     }
 }
 
@@ -73,9 +88,16 @@ data class FieldFormState<T>(val data: T?, val error: String?) {
     constructor(data: T?) : this(data, null)
 }
 
-sealed class TaskChangeEvent {
-    data class TitleChanged(val title: String) : TaskChangeEvent()
-    data class DescriptionChanged(val description: String) : TaskChangeEvent()
-    data class DueDateChanged(val dueDate: Instant?) : TaskChangeEvent()
-    object SubmitTask : TaskChangeEvent()
+sealed class TaskViewModelEvent {
+    data class TitleChanged(val title: String) : TaskViewModelEvent()
+    data class DescriptionChanged(val description: String) : TaskViewModelEvent()
+    data class DueDateChanged(val dueDate: Instant?) : TaskViewModelEvent()
+    object SubmitTask : TaskViewModelEvent()
+}
+
+enum class TaskUiState {
+    INITIAL,
+    LOADING,
+    LOADED,
+    FINISHED
 }

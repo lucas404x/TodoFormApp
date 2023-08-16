@@ -20,19 +20,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <ProgressBar
+                android:id="@+id/progress_bar_task_state"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/design_default_color_primary"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/inp_title_task_layout"
                 style="?attr/textInputFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:hint="@string/inp_untitled_txt"
                 app:counterEnabled="true"
                 app:counterMaxLength="20"
                 app:errorEnabled="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/progress_bar_task_state">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inp_title_task_field"
@@ -73,15 +86,15 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/inp_due_date_task_layout"
                 style="?attr/textInputFilledStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="@string/inp_due_date_task"
                 android:inputType="none"
-                app:startIconDrawable="@drawable/baseline_access_time_24"
-                app:startIconTint="?colorPrimary"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/input_description_task_layout">
+                app:layout_constraintTop_toBottomOf="@+id/input_description_task_layout"
+                app:startIconDrawable="@drawable/baseline_access_time_24"
+                app:startIconTint="?colorPrimary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inp_due_date_task_field"
@@ -94,6 +107,24 @@
                     android:hint="@string/inp_due_date_task"
                     android:textColorHint="@android:color/transparent" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btn_clear_due_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                app:elevation="0dp"
+                app:fabCustomSize="32dp"
+                app:fabSize="mini"
+                app:layout_constraintBottom_toBottomOf="@+id/inp_due_date_task_layout"
+                app:layout_constraintStart_toEndOf="@+id/inp_due_date_task_layout"
+                app:layout_constraintTop_toTopOf="@+id/inp_due_date_task_layout"
+                app:maxImageSize="16dp"
+                app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+                app:useCompatPadding="false" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
