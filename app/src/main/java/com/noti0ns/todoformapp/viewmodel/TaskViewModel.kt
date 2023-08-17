@@ -1,5 +1,6 @@
 package com.noti0ns.todoformapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,6 +12,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 
+typealias TaskState = Pair<Task, Boolean>
+
 class TaskViewModel : ViewModel() {
     companion object {
         private val taskRepo: TaskRepository
@@ -19,6 +22,8 @@ class TaskViewModel : ViewModel() {
             taskRepo = RoomTaskRepository()
         }
     }
+
+    private var _task = Task()
 
     private val _titleState = MutableLiveData<FieldFormState<String>>(FieldFormState())
     val titleState: LiveData<FieldFormState<String>> = _titleState
@@ -32,18 +37,24 @@ class TaskViewModel : ViewModel() {
     private val _uiState = MutableLiveData(TaskUiState.INITIAL)
     val uiState: LiveData<TaskUiState> = _uiState
 
-    private var _task = Task()
+    private var _taskState = MutableLiveData(Pair(_task, false))
+    val taskState: LiveData<TaskState> = _taskState
 
-    fun onLoadTask(task: Task) = task.apply {
+
+    fun onLoadTask(taskId: Int) {
         _uiState.value = TaskUiState.LOADING
-        _titleState.value = FieldFormState(task.title)
-        _descriptionState.value = FieldFormState(task.description)
-        _dueDateState.value = FieldFormState(task.dueDate)
-    }.also {
-        _task = it
-        _uiState.value = TaskUiState.LOADED
-    }
+        viewModelScope.launch {
+            taskRepo.get(taskId).also {
+                _titleState.value = FieldFormState(it.title)
+                _descriptionState.value = FieldFormState(it.description)
+                _dueDateState.value = FieldFormState(it.dueDate)
+                _task = it
+                _taskState.value = TaskState(it, true)
+                _uiState.value = TaskUiState.LOADED
+            }
 
+        }
+    }
 
     fun onInvokeEvent(event: TaskViewModelEvent) = when (event) {
         is TaskViewModelEvent.TitleChanged -> onTitleChanged(event.title)
@@ -73,6 +84,7 @@ class TaskViewModel : ViewModel() {
     private fun onSubmitTask() {
         viewModelScope.launch {
             _uiState.value = TaskUiState.LOADING
+            delay(1000L)
             if (_task.id == 0) {
                 taskRepo.save(_task)
             } else {

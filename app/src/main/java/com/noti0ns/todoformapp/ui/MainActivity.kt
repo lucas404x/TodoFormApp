@@ -13,6 +13,10 @@ import com.noti0ns.todoformapp.databinding.ActivityMainBinding
 import com.noti0ns.todoformapp.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
+    companion object {
+        const val TASK_ID_KEY = "EXTRA_TASK_ID"
+    }
+
     private val viewModel: MainViewModel by viewModels()
 
     private lateinit var binding: ActivityMainBinding
@@ -52,13 +56,8 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
 
     override fun onClickItem(task: Task) {
         Intent(this, TaskActivity::class.java).also {
-            it.putExtra("EXTRA_TASK", task)
+            it.putExtra(TASK_ID_KEY, task.id)
             startActivity(it)
         }
-
-    //        Snackbar.make(binding.root, "Item ${position + 1} clicked!", Snackbar.LENGTH_LONG).apply {
-//            dismiss()
-//            show()
-//        }
     }
 }

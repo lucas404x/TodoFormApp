@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
+import com.noti0ns.todoformapp.extensions.reset
 import com.noti0ns.todoformapp.viewmodel.TaskUiState
 import com.noti0ns.todoformapp.viewmodel.TaskViewModelEvent
 import com.noti0ns.todoformapp.viewmodel.TaskViewModel
@@ -93,24 +94,32 @@ class TaskActivity : AppCompatActivity() {
 
     private fun setDueDate() = _calendar.apply {
         _viewModel.onInvokeEvent(TaskViewModelEvent.DueDateChanged(toInstant()))
-        val currentDate = Instant.now().atZone(ZoneId.systemDefault())
-        set(
-            currentDate.year,
-            currentDate.monthValue,
-            currentDate.dayOfMonth,
-            currentDate.minute,
-            currentDate.second
-        )
+        reset()
     }
 
     private fun setupListeners() {
         _viewModel.uiState.observe(this) {
             when (it) {
                 TaskUiState.INITIAL -> {}
-                TaskUiState.LOADING -> _binding.progressBarTaskState.visibility = View.VISIBLE
-                TaskUiState.LOADED -> _binding.progressBarTaskState.visibility = View.GONE
+                TaskUiState.LOADING -> {
+                    _binding.progressBarTaskState.visibility = View.VISIBLE
+                    _binding.btnSaveTaskChanges.isEnabled = false
+                }
+
+                TaskUiState.LOADED -> {
+                    _binding.progressBarTaskState.visibility = View.GONE
+                    _binding.btnSaveTaskChanges.isEnabled = true
+                }
+
                 TaskUiState.FINISHED -> finish()
             }
+        }
+        _viewModel.taskState.observe(this) {
+            if (!it.second) return@observe;
+            val task = it.first
+            _binding.inpTitleTaskField.setText(task.title)
+            _binding.inputDescriptionTaskField.setText(task.description)
+            _binding.inpDueDateTaskField.setText(renderDueDate(task.dueDate))
         }
         _viewModel.titleState.observe(this) {
             title = it.data.orEmpty().ifBlank { "Untitled" }
@@ -125,20 +134,7 @@ class TaskActivity : AppCompatActivity() {
         }
         _viewModel.dueDateState.observe(this) {
             _binding.inpDueDateTaskField.apply {
-                val dueDate = when (it.data) {
-                    null -> {
-                        _binding.btnClearDueDate.visibility = View.GONE
-                        ""
-                    }
-
-                    else -> {
-                        _binding.btnClearDueDate.visibility = View.VISIBLE
-                        DateTimeFormatter.ofPattern("dd/mm/yyyy HH:mm").format(
-                            ZonedDateTime.ofInstant(it.data, ZoneId.systemDefault())
-                        )
-                    }
-                }
-                setText(dueDate)
+                setText(renderDueDate(it.data))
                 if (it.error.orEmpty().isNotBlank()) {
                     error = it.error
                 }
@@ -146,21 +142,31 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadTask() {
-        val task = if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("EXTRA_TASK", Task::class.java)
+    private fun renderDueDate(dueDate: Instant?): String? {
+        return if (dueDate == null) {
+            null
         } else {
-            intent.getParcelableExtra("EXTRA_TASK")
-        }
-        task?.let {
-            _viewModel.onLoadTask(it)
-            setInitialTaskData(it)
+            DateTimeFormatter.ofPattern("dd/mm/yyyy HH:mm").format(
+                ZonedDateTime.ofInstant(dueDate, ZoneId.systemDefault())
+            )
         }
     }
 
-    private fun setInitialTaskData(task: Task) {
-        _binding.inpTitleTaskField.setText(task.title)
-        _binding.inputDescriptionTaskField.setText(task.description)
-        _binding.inpDueDateTaskField.setText(task.dueDate.toString())
+    private fun loadTask() {
+//        val task = if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            intent.getParcelableExtra("EXTRA_TASK", Task::class.java)
+//        } else {
+//            intent.getParcelableExtra("EXTRA_TASK")
+//        }
+//        task?.let {
+//            _viewModel.onLoadTask(it)
+//            setInitialTaskData(it)
+//        }
+
+        intent.getIntExtra(MainActivity.TASK_ID_KEY, 0).also {
+            if (it > 0) {
+                _viewModel.onLoadTask(it)
+            }
+        }
     }
 }

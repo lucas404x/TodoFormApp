@@ -13,8 +13,8 @@ class RoomTaskRepository(private val dispatcher: CoroutineDispatcher = Dispatche
         private val taskDao = AppDatabase.getInstance().taskDao()
     }
 
-    override suspend fun get(id: Int): Task {
-        TODO("Not yet implemented")
+    override suspend fun get(id: Int): Task = withContext(dispatcher) {
+        taskDao.get(id)
     }
 
     override suspend fun getAll(): List<Task> = withContext(dispatcher) {
