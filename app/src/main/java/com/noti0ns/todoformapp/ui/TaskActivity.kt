@@ -44,6 +44,10 @@ class TaskActivity : AppCompatActivity() {
             inputDescriptionTaskField.doOnTextChanged { text, _, _, _ ->
                 _viewModel.onInvokeEvent(TaskViewModelEvent.DescriptionChanged(text.toString()))
             }
+            inpDueDateTaskField.doOnTextChanged { text, _, _, _ ->
+                _binding.btnClearDueDate.visibility =
+                    if (text.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE
+            }
             inpDueDateTaskField.setOnClickListener {
                 showDueDateDatePicker()
             }
@@ -111,7 +115,10 @@ class TaskActivity : AppCompatActivity() {
                     _binding.btnSaveTaskChanges.isEnabled = true
                 }
 
-                TaskUiState.FINISHED -> finish()
+                TaskUiState.FINISHED -> {
+                    setResult(MainActivity.REFRESH_CODE)
+                    finish()
+                }
             }
         }
         _viewModel.taskState.observe(this) {
@@ -152,21 +159,9 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadTask() {
-//        val task = if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//            intent.getParcelableExtra("EXTRA_TASK", Task::class.java)
-//        } else {
-//            intent.getParcelableExtra("EXTRA_TASK")
-//        }
-//        task?.let {
-//            _viewModel.onLoadTask(it)
-//            setInitialTaskData(it)
-//        }
-
-        intent.getIntExtra(MainActivity.TASK_ID_KEY, 0).also {
-            if (it > 0) {
-                _viewModel.onLoadTask(it)
-            }
+    private fun loadTask() = intent.getIntExtra(MainActivity.TASK_ID_KEY, 0).also {
+        if (it > 0) {
+            _viewModel.onLoadTask(it)
         }
     }
 }

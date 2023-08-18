@@ -1,6 +1,5 @@
 package com.noti0ns.todoformapp.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
 import com.noti0ns.todoformapp.interfaces.TaskRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -16,10 +14,10 @@ typealias TaskState = Pair<Task, Boolean>
 
 class TaskViewModel : ViewModel() {
     companion object {
-        private val taskRepo: TaskRepository
+        private val _taskRepo: TaskRepository
 
         init {
-            taskRepo = RoomTaskRepository()
+            _taskRepo = RoomTaskRepository()
         }
     }
 
@@ -44,7 +42,7 @@ class TaskViewModel : ViewModel() {
     fun onLoadTask(taskId: Int) {
         _uiState.value = TaskUiState.LOADING
         viewModelScope.launch {
-            taskRepo.get(taskId).also {
+            _taskRepo.get(taskId).also {
                 _titleState.value = FieldFormState(it.title)
                 _descriptionState.value = FieldFormState(it.description)
                 _dueDateState.value = FieldFormState(it.dueDate)
@@ -84,11 +82,10 @@ class TaskViewModel : ViewModel() {
     private fun onSubmitTask() {
         viewModelScope.launch {
             _uiState.value = TaskUiState.LOADING
-            delay(1000L)
             if (_task.id == 0) {
-                taskRepo.save(_task)
+                _taskRepo.save(_task)
             } else {
-                taskRepo.update(_task)
+                _taskRepo.update(_task)
             }
             _uiState.value = TaskUiState.FINISHED
         }

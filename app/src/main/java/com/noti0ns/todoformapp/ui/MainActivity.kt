@@ -15,6 +15,7 @@ import com.noti0ns.todoformapp.viewmodel.MainViewModel
 class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
     companion object {
         const val TASK_ID_KEY = "EXTRA_TASK_ID"
+        const val REFRESH_CODE = 0x810
     }
 
     private val viewModel: MainViewModel by viewModels()
@@ -24,7 +25,9 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
 
     private val getContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            Log.i("MainActivity.getContent.ResultCode: ", it.resultCode.toString())
+            if (it.resultCode == REFRESH_CODE) {
+                viewModel.loadTasks()
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +60,7 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
     override fun onClickItem(task: Task) {
         Intent(this, TaskActivity::class.java).also {
             it.putExtra(TASK_ID_KEY, task.id)
-            startActivity(it)
+            getContent.launch(it)
         }
     }
 }
