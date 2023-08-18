@@ -13,6 +13,11 @@ import com.noti0ns.todoformapp.databinding.ActivityMainBinding
 import com.noti0ns.todoformapp.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
+    companion object {
+        const val TASK_ID_KEY = "EXTRA_TASK_ID"
+        const val REFRESH_CODE = 0x810
+    }
+
     private val viewModel: MainViewModel by viewModels()
 
     private lateinit var binding: ActivityMainBinding
@@ -20,7 +25,9 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
 
     private val getContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            Log.i("MainActivity.getContent.ResultCode: ", it.resultCode.toString())
+            if (it.resultCode == REFRESH_CODE) {
+                viewModel.loadTasks()
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,13 +59,8 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
 
     override fun onClickItem(task: Task) {
         Intent(this, TaskActivity::class.java).also {
-            it.putExtra("EXTRA_TASK", task)
-            startActivity(it)
+            it.putExtra(TASK_ID_KEY, task.id)
+            getContent.launch(it)
         }
-
-    //        Snackbar.make(binding.root, "Item ${position + 1} clicked!", Snackbar.LENGTH_LONG).apply {
-//            dismiss()
-//            show()
-//        }
     }
 }
