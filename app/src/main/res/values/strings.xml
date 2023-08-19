@@ -5,4 +5,5 @@
     <string name="inp_description_txt">Description</string>
     <string name="str_btn_save_task_changes">Save</string>
     <string name="inp_due_date_task">Due Date</string>
+    <string name="char_space_between_texts">·</string>
 </resources>

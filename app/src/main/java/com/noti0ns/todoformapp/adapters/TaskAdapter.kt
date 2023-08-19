@@ -9,10 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.noti0ns.todoformapp.R
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.databinding.ItemTaskBinding
+import com.noti0ns.todoformapp.extensions.renderShortDate
 
 class TaskAdapter(private val events: TaskClickEvent) :
     RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
-    private var dataset: List<Task> = listOf()
+    private var dataset: MutableList<Task> = mutableListOf()
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding: ItemTaskBinding
@@ -34,7 +35,7 @@ class TaskAdapter(private val events: TaskClickEvent) :
             events.onClickItem(task)
         }
         holder.binding.txtTaskTitle.text = task.title
-        holder.binding.txtFinishTaskDate.apply {
+        holder.binding.txtFirstTaskDate.apply {
             if (task.dueDate == null) {
                 visibility = View.GONE
             } else {
@@ -43,7 +44,26 @@ class TaskAdapter(private val events: TaskClickEvent) :
             }
         }
         holder.binding.btnIsTaskDone.apply {
+            resetTileState(holder)
             isChecked = task.isDone
+            var isFirstDateSet = false
+            if (task.dueDate != null) {
+                holder.binding.txtFirstTaskDate.apply {
+                    text = task.dueDate.renderShortDate()
+                    visibility = View.VISIBLE
+                    isFirstDateSet = true
+                }
+            }
+            if (task.isDone) {
+                if (isFirstDateSet) {
+                    holder.binding.txtSepBetweenTexts.visibility = View.VISIBLE
+                    holder.binding.txtSecondTaskDate.text = task.dateFinished.renderShortDate()
+                    holder.binding.txtSecondTaskDate.visibility = View.VISIBLE
+                } else {
+                    holder.binding.txtSecondTaskDate.text = task.dateFinished.renderShortDate()
+                    holder.binding.txtSecondTaskDate.visibility = View.VISIBLE
+                }
+            }
             setOnClickListener {
                 Log.i(
                     "TaskAdapter.onBindViewHolder.Task" + task.id.toString() + ": ",
@@ -54,11 +74,22 @@ class TaskAdapter(private val events: TaskClickEvent) :
         }
     }
 
+    private fun resetTileState(holder: ViewHolder) {
+        holder.binding.txtFirstTaskDate.visibility = View.INVISIBLE
+        holder.binding.txtSecondTaskDate.visibility = View.INVISIBLE
+        holder.binding.txtSepBetweenTexts.visibility = View.INVISIBLE
+    }
+
     @SuppressLint("NotifyDataSetChanged")
-    fun setList(tasks: List<Task>) {
+    fun setList(tasks: MutableList<Task>) {
         Log.i("setList", "SetList called")
         dataset = tasks
         notifyDataSetChanged()
+    }
+
+    fun setItemChanged(task: Task, position: Int) {
+        dataset[position] = task
+        notifyItemChanged(position)
     }
 
     override fun getItemCount(): Int = dataset.size

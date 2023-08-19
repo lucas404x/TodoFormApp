@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1d242862458fd578e2fa13d261c7bc11",
+    "identityHash": "2cf937bf0df3b87bc7bea4949198bc3b",
     "entities": [
       {
         "tableName": "Task",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `is_done` INTEGER NOT NULL, `date_created` INTEGER NOT NULL, `date_updated` INTEGER, `due_date` INTEGER, `date_finished` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `is_done` INTEGER NOT NULL, `date_created` TEXT NOT NULL, `date_updated` TEXT, `due_date` TEXT, `date_finished` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -35,25 +35,25 @@
           {
             "fieldPath": "dateCreated",
             "columnName": "date_created",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
             "fieldPath": "dateUpdated",
             "columnName": "date_updated",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
             "fieldPath": "dueDate",
             "columnName": "due_date",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
             "fieldPath": "dateFinished",
             "columnName": "date_finished",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": false
           }
         ],
@@ -70,7 +70,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d242862458fd578e2fa13d261c7bc11')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2cf937bf0df3b87bc7bea4949198bc3b')"
     ]
   }
 }

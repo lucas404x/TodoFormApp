@@ -1,7 +1,7 @@
 package com.noti0ns.todoformapp.data.models
 
 import androidx.room.*
-import java.time.Instant
+import java.time.LocalDateTime
 
 @Entity
 data class Task(
@@ -9,10 +9,10 @@ data class Task(
     @ColumnInfo val title: String,
     @ColumnInfo val description: String? = null,
     @ColumnInfo("is_done") val isDone: Boolean = false,
-    @ColumnInfo("date_created") val dateCreated: Instant = Instant.now(),
-    @ColumnInfo("date_updated") val dateUpdated: Instant? = null,
-    @ColumnInfo("due_date") val dueDate: Instant? = null,
-    @ColumnInfo("date_finished") val dateFinished: Instant? = null,
+    @ColumnInfo("date_created") val dateCreated: LocalDateTime = LocalDateTime.now(),
+    @ColumnInfo("date_updated") val dateUpdated: LocalDateTime? = null,
+    @ColumnInfo("due_date") val dueDate: LocalDateTime? = null,
+    @ColumnInfo("date_finished") val dateFinished: LocalDateTime? = null,
 ) {
     constructor() : this(0, "")
 }

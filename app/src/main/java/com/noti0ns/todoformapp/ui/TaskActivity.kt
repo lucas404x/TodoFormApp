@@ -2,23 +2,18 @@ package com.noti0ns.todoformapp.ui
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.os.Build
-import android.os.Build.VERSION
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
-import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
+import com.noti0ns.todoformapp.extensions.renderFullDateTime
 import com.noti0ns.todoformapp.extensions.reset
 import com.noti0ns.todoformapp.viewmodel.TaskUiState
-import com.noti0ns.todoformapp.viewmodel.TaskViewModelEvent
 import com.noti0ns.todoformapp.viewmodel.TaskViewModel
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import com.noti0ns.todoformapp.viewmodel.TaskViewModelEvent
+import java.time.LocalDateTime
 import java.util.Calendar
 
 class TaskActivity : AppCompatActivity() {
@@ -97,7 +92,11 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun setDueDate() = _calendar.apply {
-        _viewModel.onInvokeEvent(TaskViewModelEvent.DueDateChanged(toInstant()))
+        val selectedDueDate = LocalDateTime.ofInstant(
+            toInstant(),
+            timeZone.toZoneId()
+        )
+        _viewModel.onInvokeEvent(TaskViewModelEvent.DueDateChanged(selectedDueDate))
         reset()
     }
 
@@ -116,7 +115,7 @@ class TaskActivity : AppCompatActivity() {
                 }
 
                 TaskUiState.FINISHED -> {
-                    setResult(MainActivity.REFRESH_CODE)
+                    setResult(MainActivity.REFRESH_SCREEN_CODE)
                     finish()
                 }
             }
@@ -126,7 +125,7 @@ class TaskActivity : AppCompatActivity() {
             val task = it.first
             _binding.inpTitleTaskField.setText(task.title)
             _binding.inputDescriptionTaskField.setText(task.description)
-            _binding.inpDueDateTaskField.setText(renderDueDate(task.dueDate))
+            _binding.inpDueDateTaskField.setText(task.dueDate.renderFullDateTime())
         }
         _viewModel.titleState.observe(this) {
             title = it.data.orEmpty().ifBlank { "Untitled" }
@@ -141,21 +140,11 @@ class TaskActivity : AppCompatActivity() {
         }
         _viewModel.dueDateState.observe(this) {
             _binding.inpDueDateTaskField.apply {
-                setText(renderDueDate(it.data))
+                setText(it.data.renderFullDateTime())
                 if (it.error.orEmpty().isNotBlank()) {
                     error = it.error
                 }
             }
-        }
-    }
-
-    private fun renderDueDate(dueDate: Instant?): String? {
-        return if (dueDate == null) {
-            null
-        } else {
-            DateTimeFormatter.ofPattern("dd/mm/yyyy HH:mm").format(
-                ZonedDateTime.ofInstant(dueDate, ZoneId.systemDefault())
-            )
         }
     }
 

@@ -8,7 +8,7 @@ import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
 import com.noti0ns.todoformapp.interfaces.TaskRepository
 import kotlinx.coroutines.launch
-import java.time.Instant
+import java.time.LocalDateTime
 
 typealias TaskState = Pair<Task, Boolean>
 
@@ -29,8 +29,8 @@ class TaskViewModel : ViewModel() {
     private val _descriptionState = MutableLiveData<FieldFormState<String>>(FieldFormState())
     val descriptionState: LiveData<FieldFormState<String>> = _descriptionState
 
-    private val _dueDateState = MutableLiveData<FieldFormState<Instant>>(FieldFormState())
-    val dueDateState: LiveData<FieldFormState<Instant>> = _dueDateState
+    private val _dueDateState = MutableLiveData<FieldFormState<LocalDateTime>>(FieldFormState())
+    val dueDateState: LiveData<FieldFormState<LocalDateTime>> = _dueDateState
 
     private val _uiState = MutableLiveData(TaskUiState.INITIAL)
     val uiState: LiveData<TaskUiState> = _uiState
@@ -74,7 +74,7 @@ class TaskViewModel : ViewModel() {
         _descriptionState.value = _descriptionState.value?.copy(description)
     }
 
-    private fun onDueDateChanged(dueDate: Instant?) {
+    private fun onDueDateChanged(dueDate: LocalDateTime?) {
         _task = _task.copy(dueDate = dueDate)
         _dueDateState.value = _dueDateState.value?.copy(dueDate)
     }
@@ -100,7 +100,7 @@ data class FieldFormState<T>(val data: T?, val error: String?) {
 sealed class TaskViewModelEvent {
     data class TitleChanged(val title: String) : TaskViewModelEvent()
     data class DescriptionChanged(val description: String) : TaskViewModelEvent()
-    data class DueDateChanged(val dueDate: Instant?) : TaskViewModelEvent()
+    data class DueDateChanged(val dueDate: LocalDateTime?) : TaskViewModelEvent()
     object SubmitTask : TaskViewModelEvent()
 }
 

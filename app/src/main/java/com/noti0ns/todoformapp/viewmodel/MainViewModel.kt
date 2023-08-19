@@ -8,6 +8,7 @@ import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
 import com.noti0ns.todoformapp.interfaces.TaskRepository
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class MainViewModel : ViewModel() {
     companion object {
@@ -27,7 +28,11 @@ class MainViewModel : ViewModel() {
 
     fun toggleTaskState(taskPos: Int) = viewModelScope.launch {
         _tasks.value?.getOrNull(taskPos)?.let {
-            val task = it.copy(isDone = !it.isDone)
+            val task = it.copy(
+                isDone = !it.isDone,
+                dateUpdated = LocalDateTime.now(),
+                dateFinished = if (!it.isDone) null else LocalDateTime.now()
+            )
             _taskRepo.update(task)
             _tasks.value?.set(taskPos, task)
             _tasks.value = _tasks.value?.sortedBy { x -> x.isDone }?.toMutableList()

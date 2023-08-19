@@ -2,7 +2,6 @@ package com.noti0ns.todoformapp.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +14,7 @@ import com.noti0ns.todoformapp.viewmodel.MainViewModel
 class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
     companion object {
         const val TASK_ID_KEY = "EXTRA_TASK_ID"
-        const val REFRESH_CODE = 0x810
+        const val REFRESH_SCREEN_CODE = 0x810
     }
 
     private val viewModel: MainViewModel by viewModels()
@@ -25,7 +24,7 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
 
     private val getContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == REFRESH_CODE) {
+            if (it.resultCode == REFRESH_SCREEN_CODE) {
                 viewModel.loadTasks()
             }
         }

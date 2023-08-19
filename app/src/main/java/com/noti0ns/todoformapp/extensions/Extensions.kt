@@ -1,11 +1,12 @@
 package com.noti0ns.todoformapp.extensions
 
-import java.time.Instant
-import java.time.ZoneId
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Calendar
 
 fun Calendar.reset() = apply {
-    val currentDate = Instant.now().atZone(ZoneId.systemDefault())
+    val currentDate = LocalDateTime.now()
     set(
         currentDate.year,
         currentDate.monthValue,
@@ -14,3 +15,13 @@ fun Calendar.reset() = apply {
         currentDate.second
     )
 }
+
+fun LocalDateTime?.renderFullDateTime(): String? = this?.format(
+    DateTimeFormatter.ofLocalizedDateTime(
+        FormatStyle.MEDIUM,
+        FormatStyle.SHORT
+    )
+)
+
+fun LocalDateTime?.renderShortDate(): String? =
+    this?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
