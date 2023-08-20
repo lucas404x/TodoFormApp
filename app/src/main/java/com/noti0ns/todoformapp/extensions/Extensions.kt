@@ -24,4 +24,4 @@ fun LocalDateTime?.renderFullDateTime(): String? = this?.format(
 )
 
 fun LocalDateTime?.renderShortDate(): String? =
-    this?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
+    this?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))

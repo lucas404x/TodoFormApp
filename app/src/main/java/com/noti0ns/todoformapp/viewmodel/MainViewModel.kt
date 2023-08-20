@@ -19,23 +19,27 @@ class MainViewModel : ViewModel() {
         _taskRepo = RoomTaskRepository()
     }
 
-    private var _tasks = MutableLiveData<MutableList<Task>>()
+    private val _tasks = MutableLiveData<MutableList<Task>>()
     val tasks: LiveData<MutableList<Task>> = _tasks
 
+    private val _taskUpdated = MutableLiveData<Pair<Int, Task>?>()
+    val taskUpdated: LiveData<Pair<Int, Task>?> = _taskUpdated
+
     fun loadTasks() = viewModelScope.launch {
-        _tasks.value = _taskRepo.getAll().toMutableList()
+        _tasks.value = _taskRepo.getAll().sortedBy { x -> x.isDone }.toMutableList()
     }
 
     fun toggleTaskState(taskPos: Int) = viewModelScope.launch {
         _tasks.value?.getOrNull(taskPos)?.let {
-            val task = it.copy(
-                isDone = !it.isDone,
+            val isDoneToggled = !it.isDone
+            val updatedTask = it.copy(
+                isDone = isDoneToggled,
                 dateUpdated = LocalDateTime.now(),
-                dateFinished = if (!it.isDone) null else LocalDateTime.now()
+                dateFinished = if (isDoneToggled) LocalDateTime.now() else null
             )
-            _taskRepo.update(task)
-            _tasks.value?.set(taskPos, task)
-            _tasks.value = _tasks.value?.sortedBy { x -> x.isDone }?.toMutableList()
+            _taskRepo.update(updatedTask)
+            _tasks.value?.set(taskPos, updatedTask)
+            _taskUpdated.value = Pair(taskPos, updatedTask)
         }
     }
 }

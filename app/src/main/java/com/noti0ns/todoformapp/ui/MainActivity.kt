@@ -49,6 +49,12 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
             taskAdapter.setList(it)
         }
 
+        viewModel.taskUpdated.observe(this) {
+            it?.let { taskUpdateData ->
+                taskAdapter.setItemChanged(taskUpdateData.first, taskUpdateData.second)
+            }
+        }
+
         viewModel.loadTasks()
     }
 

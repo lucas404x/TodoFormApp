@@ -10,9 +10,11 @@ import androidx.core.widget.doOnTextChanged
 import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
 import com.noti0ns.todoformapp.extensions.renderFullDateTime
 import com.noti0ns.todoformapp.extensions.reset
+import com.noti0ns.todoformapp.viewmodel.TaskField
 import com.noti0ns.todoformapp.viewmodel.TaskUiState
 import com.noti0ns.todoformapp.viewmodel.TaskViewModel
 import com.noti0ns.todoformapp.viewmodel.TaskViewModelEvent
+import com.noti0ns.todoformapp.viewmodel.UIState
 import java.time.LocalDateTime
 import java.util.Calendar
 
@@ -103,18 +105,18 @@ class TaskActivity : AppCompatActivity() {
     private fun setupListeners() {
         _viewModel.uiState.observe(this) {
             when (it) {
-                TaskUiState.INITIAL -> {}
-                TaskUiState.LOADING -> {
+                UIState.Initial -> {}
+                UIState.Loading -> {
                     _binding.progressBarTaskState.visibility = View.VISIBLE
                     _binding.btnSaveTaskChanges.isEnabled = false
                 }
-
-                TaskUiState.LOADED -> {
+                is UIState.Loaded -> {
                     _binding.progressBarTaskState.visibility = View.GONE
                     _binding.btnSaveTaskChanges.isEnabled = true
                 }
-
-                TaskUiState.FINISHED -> {
+                is UIState.SetFieldData<*> -> handleSetFieldData(it)
+                is UIState.Error -> handleFieldError(it)
+                UIState.Finished -> {
                     setResult(MainActivity.REFRESH_SCREEN_CODE)
                     finish()
                 }
@@ -129,23 +131,35 @@ class TaskActivity : AppCompatActivity() {
         }
         _viewModel.titleState.observe(this) {
             title = it.data.orEmpty().ifBlank { "Untitled" }
-            if (it.error.orEmpty().isNotBlank()) {
-                _binding.inpTitleTaskField.error = it.error
-            }
+            _binding.inpTitleTaskField.error = it.error
         }
         _viewModel.descriptionState.observe(this) {
-            if (it.error.orEmpty().isNotBlank()) {
-                _binding.inputDescriptionTaskField.error = it.error
-            }
+            _binding.inputDescriptionTaskField.error = it.error
         }
         _viewModel.dueDateState.observe(this) {
             _binding.inpDueDateTaskField.apply {
                 setText(it.data.renderFullDateTime())
-                if (it.error.orEmpty().isNotBlank()) {
-                    error = it.error
+                error = it.error
+            }
+        }
+    }
+
+    private fun handleSetFieldData(setFieldData: UIState.SetFieldData<*>) {
+        when (setFieldData.field) {
+            TaskField.TITLE -> {}
+            TaskField.DESCRIPTION -> {}
+            TaskField.DUE_DATE -> {
+                if (setFieldData.data is LocalDateTime?) {
+                    _binding.inpDueDateTaskField.setText((setFieldData.data.renderFullDateTime()))
                 }
             }
         }
+    }
+
+    private fun handleFieldError(error: UIState.Error) = when (error.field) {
+        TaskField.TITLE -> _binding.inpTitleTaskField.error = error.message
+        TaskField.DESCRIPTION -> _binding.inputDescriptionTaskField.error = error.message
+        TaskField.DUE_DATE -> _binding.inpDueDateTaskField.error = error.message
     }
 
     private fun loadTask() = intent.getIntExtra(MainActivity.TASK_ID_KEY, 0).also {

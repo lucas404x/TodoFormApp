@@ -10,7 +10,7 @@ data class Task(
     @ColumnInfo val description: String? = null,
     @ColumnInfo("is_done") val isDone: Boolean = false,
     @ColumnInfo("date_created") val dateCreated: LocalDateTime = LocalDateTime.now(),
-    @ColumnInfo("date_updated") val dateUpdated: LocalDateTime? = null,
+    @ColumnInfo("date_updated") val dateUpdated: LocalDateTime? = LocalDateTime.now(),
     @ColumnInfo("due_date") val dueDate: LocalDateTime? = null,
     @ColumnInfo("date_finished") val dateFinished: LocalDateTime? = null,
 ) {

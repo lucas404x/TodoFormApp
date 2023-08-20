@@ -8,6 +8,7 @@ import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
 import com.noti0ns.todoformapp.interfaces.TaskRepository
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 typealias TaskState = Pair<Task, Boolean>
@@ -23,6 +24,9 @@ class TaskViewModel : ViewModel() {
 
     private var _task = Task()
 
+    private val _uiState = MutableLiveData<UIState>(UIState.Initial)
+    val uiState: LiveData<UIState> = _uiState
+
     private val _titleState = MutableLiveData<FieldFormState<String>>(FieldFormState())
     val titleState: LiveData<FieldFormState<String>> = _titleState
 
@@ -31,24 +35,25 @@ class TaskViewModel : ViewModel() {
 
     private val _dueDateState = MutableLiveData<FieldFormState<LocalDateTime>>(FieldFormState())
     val dueDateState: LiveData<FieldFormState<LocalDateTime>> = _dueDateState
-
-    private val _uiState = MutableLiveData(TaskUiState.INITIAL)
-    val uiState: LiveData<TaskUiState> = _uiState
+//
+//    private val _uiState = MutableLiveData(TaskUiState.INITIAL)
+//    val uiState: LiveData<TaskUiState> = _uiState
 
     private var _taskState = MutableLiveData(Pair(_task, false))
     val taskState: LiveData<TaskState> = _taskState
 
 
     fun onLoadTask(taskId: Int) {
-        _uiState.value = TaskUiState.LOADING
         viewModelScope.launch {
             _taskRepo.get(taskId).also {
-                _titleState.value = FieldFormState(it.title)
-                _descriptionState.value = FieldFormState(it.description)
-                _dueDateState.value = FieldFormState(it.dueDate)
+                _uiState.value = UIState.Loading
+//                _titleState.value = FieldFormState(it.title)
+//                _descriptionState.value = FieldFormState(it.description)
+//                _dueDateState.value = FieldFormState(it.dueDate)
                 _task = it
                 _taskState.value = TaskState(it, true)
-                _uiState.value = TaskUiState.LOADED
+                _uiState.value = UIState.Loaded(it)
+//                _uiState.value = TaskUiState.LOADED
             }
 
         }
@@ -63,31 +68,41 @@ class TaskViewModel : ViewModel() {
 
     private fun onTitleChanged(title: String) {
         _task = _task.copy(title = title)
-        _titleState.value = _titleState.value?.copy(
-            title,
-            if (title.isBlank()) "The title is required" else null
-        )
+        if (title.isBlank()) {
+            _uiState.value = UIState.Error("The title is required", TaskField.TITLE)
+        }
+//        _titleState.value = _titleState.value?.copy(
+//            title,
+//            if (title.isBlank()) "The title is required" else null
+//        )
     }
 
     private fun onDescriptionChanged(description: String?) {
         _task = _task.copy(description = description)
-        _descriptionState.value = _descriptionState.value?.copy(description)
+//        _descriptionState.value = _descriptionState.value?.copy(description)
     }
 
     private fun onDueDateChanged(dueDate: LocalDateTime?) {
         _task = _task.copy(dueDate = dueDate)
-        _dueDateState.value = _dueDateState.value?.copy(dueDate)
+        dueDate?.let {
+            if (it.toLocalDate() <= LocalDate.now()) {
+                _uiState.value = UIState.Error(
+                    "The Due Date must be greater than current date.",
+                    TaskField.DESCRIPTION
+                )
+            }
+        }
     }
 
     private fun onSubmitTask() {
         viewModelScope.launch {
-            _uiState.value = TaskUiState.LOADING
+            _uiState.value = UIState.Loading
             if (_task.id == 0) {
                 _taskRepo.save(_task)
             } else {
                 _taskRepo.update(_task)
             }
-            _uiState.value = TaskUiState.FINISHED
+            _uiState.value = UIState.Finished
         }
     }
 }
@@ -103,6 +118,17 @@ sealed class TaskViewModelEvent {
     data class DueDateChanged(val dueDate: LocalDateTime?) : TaskViewModelEvent()
     object SubmitTask : TaskViewModelEvent()
 }
+
+sealed class UIState {
+    object Initial : UIState()
+    object Loading : UIState()
+    data class Loaded(val task: Task) : UIState()
+    data class SetFieldData<T>(val data: T?, val field: TaskField) : UIState()
+    data class Error(val message: String, val field: TaskField) : UIState()
+    object Finished : UIState()
+}
+
+enum class TaskField { TITLE, DESCRIPTION, DUE_DATE }
 
 enum class TaskUiState {
     INITIAL,

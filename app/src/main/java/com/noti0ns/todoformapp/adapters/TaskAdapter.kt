@@ -1,6 +1,7 @@
 package com.noti0ns.todoformapp.adapters
 
 import android.annotation.SuppressLint
+import android.opengl.Visibility
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +11,13 @@ import com.noti0ns.todoformapp.R
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.databinding.ItemTaskBinding
 import com.noti0ns.todoformapp.extensions.renderShortDate
+import java.time.LocalDate
 
 class TaskAdapter(private val events: TaskClickEvent) :
     RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
     private var dataset: MutableList<Task> = mutableListOf()
+
+    private var _textViewDefaultColorCached: Int? = null
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding: ItemTaskBinding
@@ -30,28 +34,34 @@ class TaskAdapter(private val events: TaskClickEvent) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        resetTileState(holder)
         val task = dataset[position]
         holder.binding.constraintLayout.setOnClickListener {
             events.onClickItem(task)
         }
         holder.binding.txtTaskTitle.text = task.title
-        holder.binding.txtFirstTaskDate.apply {
-            if (task.dueDate == null) {
-                visibility = View.GONE
-            } else {
-                text = task.dueDate.toString()
-                visibility = View.VISIBLE
-            }
-        }
         holder.binding.btnIsTaskDone.apply {
-            resetTileState(holder)
+            setOnClickListener {
+                Log.d(
+                    "TaskAdapter.onBindViewHolder.Task" + task.id.toString() + ": ",
+                    task.isDone.toString()
+                )
+                events.onCheckboxChanged(position)
+            }
             isChecked = task.isDone
             var isFirstDateSet = false
-            if (task.dueDate != null) {
+            task.dueDate?.let {
                 holder.binding.txtFirstTaskDate.apply {
-                    text = task.dueDate.renderShortDate()
-                    visibility = View.VISIBLE
                     isFirstDateSet = true
+                    text = it.renderShortDate()
+                    visibility = View.VISIBLE
+                    if (it.toLocalDate() <= LocalDate.now() && !task.isDone)
+                        setTextColor(
+                            resources.getColor(
+                                com.google.android.material.R.color.design_default_color_error,
+                                context.theme
+                            )
+                        )
                 }
             }
             if (task.isDone) {
@@ -60,34 +70,35 @@ class TaskAdapter(private val events: TaskClickEvent) :
                     holder.binding.txtSecondTaskDate.text = task.dateFinished.renderShortDate()
                     holder.binding.txtSecondTaskDate.visibility = View.VISIBLE
                 } else {
-                    holder.binding.txtSecondTaskDate.text = task.dateFinished.renderShortDate()
-                    holder.binding.txtSecondTaskDate.visibility = View.VISIBLE
+                    holder.binding.txtFirstTaskDate.text = task.dateFinished.renderShortDate()
+                    holder.binding.txtFirstTaskDate.visibility = View.VISIBLE
                 }
-            }
-            setOnClickListener {
-                Log.i(
-                    "TaskAdapter.onBindViewHolder.Task" + task.id.toString() + ": ",
-                    task.isDone.toString()
-                )
-                events.onCheckboxChanged(position)
             }
         }
     }
 
     private fun resetTileState(holder: ViewHolder) {
-        holder.binding.txtFirstTaskDate.visibility = View.INVISIBLE
-        holder.binding.txtSecondTaskDate.visibility = View.INVISIBLE
+        holder.binding.txtFirstTaskDate.apply {
+            _textViewDefaultColorCached = _textViewDefaultColorCached ?: textColors.defaultColor
+            setTextColor(_textViewDefaultColorCached!!)
+            text = null
+            visibility = View.VISIBLE
+        }
         holder.binding.txtSepBetweenTexts.visibility = View.INVISIBLE
+        holder.binding.txtSecondTaskDate.apply {
+            text = null
+            visibility = View.VISIBLE
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     fun setList(tasks: MutableList<Task>) {
-        Log.i("setList", "SetList called")
+        Log.d("setList", "SetList called")
         dataset = tasks
         notifyDataSetChanged()
     }
 
-    fun setItemChanged(task: Task, position: Int) {
+    fun setItemChanged(position: Int, task: Task) {
         dataset[position] = task
         notifyItemChanged(position)
     }
