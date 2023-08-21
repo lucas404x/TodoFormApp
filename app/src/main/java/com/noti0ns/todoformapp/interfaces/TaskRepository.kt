@@ -7,5 +7,5 @@ interface TaskRepository {
     suspend fun getAll(): List<Task>
     suspend fun save(task: Task): Task
     suspend fun update(task: Task): Task
-    suspend fun delete(id: Int)
+    suspend fun delete(task: Task)
 }

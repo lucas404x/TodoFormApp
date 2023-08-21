@@ -11,7 +11,6 @@ import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
 import com.noti0ns.todoformapp.extensions.renderFullDateTime
 import com.noti0ns.todoformapp.extensions.reset
 import com.noti0ns.todoformapp.viewmodel.TaskField
-import com.noti0ns.todoformapp.viewmodel.TaskUiState
 import com.noti0ns.todoformapp.viewmodel.TaskViewModel
 import com.noti0ns.todoformapp.viewmodel.TaskViewModelEvent
 import com.noti0ns.todoformapp.viewmodel.UIState
@@ -110,36 +109,22 @@ class TaskActivity : AppCompatActivity() {
                     _binding.progressBarTaskState.visibility = View.VISIBLE
                     _binding.btnSaveTaskChanges.isEnabled = false
                 }
+
                 is UIState.Loaded -> {
                     _binding.progressBarTaskState.visibility = View.GONE
                     _binding.btnSaveTaskChanges.isEnabled = true
+                    title = it.task.title
+                    _binding.inpTitleTaskField.setText(it.task.title)
+                    _binding.inputDescriptionTaskField.setText(it.task.description)
+                    _binding.inpDueDateTaskField.setText(it.task.dueDate.renderFullDateTime())
                 }
+
                 is UIState.SetFieldData<*> -> handleSetFieldData(it)
                 is UIState.Error -> handleFieldError(it)
                 UIState.Finished -> {
                     setResult(MainActivity.REFRESH_SCREEN_CODE)
                     finish()
                 }
-            }
-        }
-        _viewModel.taskState.observe(this) {
-            if (!it.second) return@observe;
-            val task = it.first
-            _binding.inpTitleTaskField.setText(task.title)
-            _binding.inputDescriptionTaskField.setText(task.description)
-            _binding.inpDueDateTaskField.setText(task.dueDate.renderFullDateTime())
-        }
-        _viewModel.titleState.observe(this) {
-            title = it.data.orEmpty().ifBlank { "Untitled" }
-            _binding.inpTitleTaskField.error = it.error
-        }
-        _viewModel.descriptionState.observe(this) {
-            _binding.inputDescriptionTaskField.error = it.error
-        }
-        _viewModel.dueDateState.observe(this) {
-            _binding.inpDueDateTaskField.apply {
-                setText(it.data.renderFullDateTime())
-                error = it.error
             }
         }
     }

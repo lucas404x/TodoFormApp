@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.noti0ns.todoformapp.MyApp
-import com.noti0ns.todoformapp.constants.Directories
+import com.noti0ns.todoformapp.constants.Assets
 import com.noti0ns.todoformapp.data.db.converters.Converters
 import com.noti0ns.todoformapp.data.db.daos.*
 import com.noti0ns.todoformapp.data.models.Task
@@ -27,7 +27,7 @@ abstract class AppDatabase : RoomDatabase() {
             AppDatabase::class.java,
             "sample.db"
         ).createFromAsset(
-            Directories.database
+            Assets.database
         ).build().also {
             instance = it
         }

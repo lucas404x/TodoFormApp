@@ -11,8 +11,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-typealias TaskState = Pair<Task, Boolean>
-
 class TaskViewModel : ViewModel() {
     companion object {
         private val _taskRepo: TaskRepository
@@ -27,33 +25,12 @@ class TaskViewModel : ViewModel() {
     private val _uiState = MutableLiveData<UIState>(UIState.Initial)
     val uiState: LiveData<UIState> = _uiState
 
-    private val _titleState = MutableLiveData<FieldFormState<String>>(FieldFormState())
-    val titleState: LiveData<FieldFormState<String>> = _titleState
-
-    private val _descriptionState = MutableLiveData<FieldFormState<String>>(FieldFormState())
-    val descriptionState: LiveData<FieldFormState<String>> = _descriptionState
-
-    private val _dueDateState = MutableLiveData<FieldFormState<LocalDateTime>>(FieldFormState())
-    val dueDateState: LiveData<FieldFormState<LocalDateTime>> = _dueDateState
-//
-//    private val _uiState = MutableLiveData(TaskUiState.INITIAL)
-//    val uiState: LiveData<TaskUiState> = _uiState
-
-    private var _taskState = MutableLiveData(Pair(_task, false))
-    val taskState: LiveData<TaskState> = _taskState
-
-
     fun onLoadTask(taskId: Int) {
         viewModelScope.launch {
             _taskRepo.get(taskId).also {
                 _uiState.value = UIState.Loading
-//                _titleState.value = FieldFormState(it.title)
-//                _descriptionState.value = FieldFormState(it.description)
-//                _dueDateState.value = FieldFormState(it.dueDate)
                 _task = it
-                _taskState.value = TaskState(it, true)
                 _uiState.value = UIState.Loaded(it)
-//                _uiState.value = TaskUiState.LOADED
             }
 
         }
@@ -71,26 +48,24 @@ class TaskViewModel : ViewModel() {
         if (title.isBlank()) {
             _uiState.value = UIState.Error("The title is required", TaskField.TITLE)
         }
-//        _titleState.value = _titleState.value?.copy(
-//            title,
-//            if (title.isBlank()) "The title is required" else null
-//        )
     }
 
     private fun onDescriptionChanged(description: String?) {
         _task = _task.copy(description = description)
-//        _descriptionState.value = _descriptionState.value?.copy(description)
     }
 
     private fun onDueDateChanged(dueDate: LocalDateTime?) {
         _task = _task.copy(dueDate = dueDate)
+        var errorMsg: String? = null
         dueDate?.let {
             if (it.toLocalDate() <= LocalDate.now()) {
-                _uiState.value = UIState.Error(
-                    "The Due Date must be greater than current date.",
-                    TaskField.DESCRIPTION
-                )
+                errorMsg = "The Due Date must be greater than current date."
             }
+        }
+        _uiState.value = if (errorMsg == null) {
+            UIState.SetFieldData(dueDate, TaskField.DUE_DATE)
+        } else {
+            UIState.Error(errorMsg!!, TaskField.DUE_DATE)
         }
     }
 
@@ -105,11 +80,6 @@ class TaskViewModel : ViewModel() {
             _uiState.value = UIState.Finished
         }
     }
-}
-
-data class FieldFormState<T>(val data: T?, val error: String?) {
-    constructor() : this(null, null)
-    constructor(data: T?) : this(data, null)
 }
 
 sealed class TaskViewModelEvent {
@@ -129,10 +99,3 @@ sealed class UIState {
 }
 
 enum class TaskField { TITLE, DESCRIPTION, DUE_DATE }
-
-enum class TaskUiState {
-    INITIAL,
-    LOADING,
-    LOADED,
-    FINISHED
-}

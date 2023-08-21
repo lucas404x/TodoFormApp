@@ -31,8 +31,7 @@ class RoomTaskRepository(private val dispatcher: CoroutineDispatcher = Dispatche
         taskDao.update(task).let { task }
     }
 
-    override suspend fun delete(id: Int) {
-        TODO("Not yet implemented")
+    override suspend fun delete(task: Task) = withContext(dispatcher) {
+        taskDao.delete(task)
     }
-
 }
