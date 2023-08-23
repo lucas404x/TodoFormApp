@@ -7,4 +7,5 @@
     <string name="inp_due_date_task">Due Date</string>
     <string name="char_space_between_texts">·</string>
     <string name="txt_empty_task_list">No tasks available.</string>
+    <string name="txt_yes">Yes</string>
 </resources>

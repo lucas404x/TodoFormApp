@@ -19,18 +19,19 @@ class MainViewModel : ViewModel() {
         _taskRepo = RoomTaskRepository()
     }
 
-    private val _tasks = MutableLiveData<MutableList<Task>>()
-    val tasks: LiveData<MutableList<Task>> = _tasks
+    private var _tasks = mutableListOf<Task>()
 
-    private val _taskUpdated = MutableLiveData<Pair<Int, Task>?>()
-    val taskUpdated: LiveData<Pair<Int, Task>?> = _taskUpdated
+    private val _uiState = MutableLiveData<UIState>(UIState.Initial)
+    val uiState: LiveData<UIState> = _uiState
+
 
     fun loadTasks() = viewModelScope.launch {
-        _tasks.value = _taskRepo.getAll().sortedBy { x -> x.isDone }.toMutableList()
+        _tasks = _taskRepo.getAll().sortedBy { x -> x.isDone }.toMutableList()
+        _uiState.value = UIState.Loaded(_tasks)
     }
 
     fun toggleTaskState(taskPos: Int) = viewModelScope.launch {
-        _tasks.value?.getOrNull(taskPos)?.let {
+        _tasks.getOrNull(taskPos)?.let {
             val isDoneToggled = !it.isDone
             val updatedTask = it.copy(
                 isDone = isDoneToggled,
@@ -38,8 +39,23 @@ class MainViewModel : ViewModel() {
                 dateFinished = if (isDoneToggled) LocalDateTime.now() else null
             )
             _taskRepo.update(updatedTask)
-            _tasks.value?.set(taskPos, updatedTask)
-            _taskUpdated.value = Pair(taskPos, updatedTask)
+            _tasks[taskPos] = updatedTask
+            _uiState.value = UIState.TaskUpdated(taskPos, updatedTask)
         }
+    }
+
+    fun deleteTask(taskPos: Int) = viewModelScope.launch {
+        _tasks.getOrNull(taskPos)?.let {
+            _taskRepo.delete(it)
+            _tasks.removeAt(taskPos)
+            _uiState.value = UIState.TaskRemoved(taskPos)
+        }
+    }
+
+    sealed class UIState {
+        object Initial : UIState()
+        data class Loaded(val tasks: MutableList<Task>) : UIState()
+        data class TaskUpdated(val taskPosition: Int, val updatedTask: Task) : UIState()
+        data class TaskRemoved(val taskPosition: Int) : UIState()
     }
 }

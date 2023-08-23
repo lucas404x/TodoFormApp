@@ -86,22 +86,22 @@ class TaskViewModel : ViewModel() {
             _uiState.value = UIState.Finished
         }
     }
-}
 
-sealed class TaskViewModelEvent {
-    data class TitleChanged(val title: String) : TaskViewModelEvent()
-    data class DescriptionChanged(val description: String) : TaskViewModelEvent()
-    data class DueDateChanged(val dueDate: LocalDateTime?) : TaskViewModelEvent()
-    object SubmitTask : TaskViewModelEvent()
-}
+    sealed class TaskViewModelEvent {
+        data class TitleChanged(val title: String) : TaskViewModelEvent()
+        data class DescriptionChanged(val description: String) : TaskViewModelEvent()
+        data class DueDateChanged(val dueDate: LocalDateTime?) : TaskViewModelEvent()
+        object SubmitTask : TaskViewModelEvent()
+    }
 
-sealed class UIState {
-    object Initial : UIState()
-    object Loading : UIState()
-    data class Loaded(val task: Task) : UIState()
-    data class SetFieldData<T>(val data: T?, val field: TaskField) : UIState()
-    data class Error(val message: String, val field: TaskField) : UIState()
-    object Finished : UIState()
-}
+    sealed class UIState {
+        object Initial : UIState()
+        object Loading : UIState()
+        data class Loaded(val task: Task) : UIState()
+        data class SetFieldData<T>(val data: T?, val field: TaskField) : UIState()
+        data class Error(val message: String, val field: TaskField) : UIState()
+        object Finished : UIState()
+    }
 
-enum class TaskField { TITLE, DESCRIPTION, DUE_DATE }
+    enum class TaskField { TITLE, DESCRIPTION, DUE_DATE }
+}

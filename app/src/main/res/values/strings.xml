@@ -7,4 +7,7 @@
     <string name="inp_due_date_task">Due Date</string>
     <string name="char_space_between_texts">·</string>
     <string name="txt_empty_task_list">No tasks available.</string>
+    <string name="txt_remove_task_dialog_body">You will remove the task named \"%1$s\".\n\nAre you sure?</string>
+    <string name="txt_no">No</string>
+    <string name="txt_yes">Yes</string>
 </resources>

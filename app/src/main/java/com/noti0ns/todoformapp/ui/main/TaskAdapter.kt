@@ -35,8 +35,12 @@ class TaskAdapter(private val events: TaskClickEvent) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         resetTileState(holder)
         val task = dataset[position]
-        holder.binding.constraintLayout.setOnClickListener {
-            events.onClickItem(task)
+        holder.binding.constraintLayout.apply {
+            setOnClickListener { events.onClickItem(task) }
+            setOnLongClickListener {
+                events.onDeleteItem(position, task)
+                true
+            }
         }
         holder.binding.txtTaskTitle.text = task.title
         holder.binding.btnIsTaskDone.apply {
@@ -97,15 +101,11 @@ class TaskAdapter(private val events: TaskClickEvent) :
         notifyDataSetChanged()
     }
 
-    fun setItemChanged(position: Int, task: Task) {
-        dataset[position] = task
-        notifyItemChanged(position)
-    }
-
     override fun getItemCount(): Int = dataset.size
 
     interface TaskClickEvent {
         fun onCheckboxChanged(position: Int)
         fun onClickItem(task: Task)
+        fun onDeleteItem(position: Int, task: Task)
     }
 }
