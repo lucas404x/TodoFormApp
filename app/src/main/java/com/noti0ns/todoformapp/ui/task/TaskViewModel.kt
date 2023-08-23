@@ -1,4 +1,4 @@
-package com.noti0ns.todoformapp.viewmodel
+package com.noti0ns.todoformapp.ui.task
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
-import com.noti0ns.todoformapp.interfaces.TaskRepository
+import com.noti0ns.todoformapp.data.repositories.TaskRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,6 +24,8 @@ class TaskViewModel : ViewModel() {
 
     private val _uiState = MutableLiveData<UIState>(UIState.Initial)
     val uiState: LiveData<UIState> = _uiState
+
+
 
     fun onLoadTask(taskId: Int) {
         viewModelScope.launch {
@@ -48,10 +50,14 @@ class TaskViewModel : ViewModel() {
         if (title.isBlank()) {
             _uiState.value = UIState.Error("The title is required", TaskField.TITLE)
         }
+        else {
+            _uiState.value = UIState.SetFieldData(title, TaskField.TITLE)
+        }
     }
 
     private fun onDescriptionChanged(description: String?) {
         _task = _task.copy(description = description)
+        _uiState.value = UIState.SetFieldData(description, TaskField.DESCRIPTION)
     }
 
     private fun onDueDateChanged(dueDate: LocalDateTime?) {
@@ -59,7 +65,7 @@ class TaskViewModel : ViewModel() {
         var errorMsg: String? = null
         dueDate?.let {
             if (it.toLocalDate() <= LocalDate.now()) {
-                errorMsg = "The Due Date must be greater than current date."
+                errorMsg = "The Due Date must be greater than the current date."
             }
         }
         _uiState.value = if (errorMsg == null) {

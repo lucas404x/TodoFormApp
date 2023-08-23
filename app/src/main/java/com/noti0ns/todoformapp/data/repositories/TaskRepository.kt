@@ -1,4 +1,4 @@
-package com.noti0ns.todoformapp.interfaces
+package com.noti0ns.todoformapp.data.repositories
 
 import com.noti0ns.todoformapp.data.models.Task
 

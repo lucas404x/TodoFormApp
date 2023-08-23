@@ -2,7 +2,6 @@ package com.noti0ns.todoformapp.data.repositories
 
 import com.noti0ns.todoformapp.data.db.AppDatabase
 import com.noti0ns.todoformapp.data.models.Task
-import com.noti0ns.todoformapp.interfaces.TaskRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

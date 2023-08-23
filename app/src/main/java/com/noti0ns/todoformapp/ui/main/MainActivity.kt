@@ -1,17 +1,15 @@
-package com.noti0ns.todoformapp.ui
+package com.noti0ns.todoformapp.ui.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.noti0ns.todoformapp.adapters.TaskAdapter
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.databinding.ActivityMainBinding
-import com.noti0ns.todoformapp.viewmodel.MainViewModel
+import com.noti0ns.todoformapp.ui.task.TaskActivity
 
 class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
     companion object {
@@ -49,6 +47,8 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
 
         viewModel.tasks.observe(this) {
             taskAdapter.setList(it)
+            binding.txtListHasNoItems.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+            binding.taskList.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
         }
 
         viewModel.taskUpdated.observe(this) {

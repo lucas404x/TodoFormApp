@@ -1,4 +1,4 @@
-package com.noti0ns.todoformapp.ui
+package com.noti0ns.todoformapp.ui.task
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -7,13 +7,11 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import com.google.android.material.snackbar.Snackbar
 import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
 import com.noti0ns.todoformapp.extensions.renderFullDateTime
 import com.noti0ns.todoformapp.extensions.reset
-import com.noti0ns.todoformapp.viewmodel.TaskField
-import com.noti0ns.todoformapp.viewmodel.TaskViewModel
-import com.noti0ns.todoformapp.viewmodel.TaskViewModelEvent
-import com.noti0ns.todoformapp.viewmodel.UIState
+import com.noti0ns.todoformapp.ui.main.MainActivity
 import java.time.LocalDateTime
 import java.util.Calendar
 
@@ -113,10 +111,10 @@ class TaskActivity : AppCompatActivity() {
                 is UIState.Loaded -> {
                     _binding.progressBarTaskState.visibility = View.GONE
                     _binding.btnSaveTaskChanges.isEnabled = true
-                    title = it.task.title
                     _binding.inpTitleTaskField.setText(it.task.title)
                     _binding.inputDescriptionTaskField.setText(it.task.description)
                     _binding.inpDueDateTaskField.setText(it.task.dueDate.renderFullDateTime())
+                    title = it.task.title.ifBlank { "Untitled" }
                 }
 
                 is UIState.SetFieldData<*> -> handleSetFieldData(it)
@@ -131,11 +129,16 @@ class TaskActivity : AppCompatActivity() {
 
     private fun handleSetFieldData(setFieldData: UIState.SetFieldData<*>) {
         when (setFieldData.field) {
-            TaskField.TITLE -> {}
+            TaskField.TITLE -> {
+                if (setFieldData.data is String?) {
+                    title = setFieldData.data.orEmpty().ifBlank { "Untitled" }
+                }
+            }
             TaskField.DESCRIPTION -> {}
             TaskField.DUE_DATE -> {
                 if (setFieldData.data is LocalDateTime?) {
                     _binding.inpDueDateTaskField.setText((setFieldData.data.renderFullDateTime()))
+                    _binding.inpDueDateTaskField.error = null
                 }
             }
         }
@@ -144,7 +147,10 @@ class TaskActivity : AppCompatActivity() {
     private fun handleFieldError(error: UIState.Error) = when (error.field) {
         TaskField.TITLE -> _binding.inpTitleTaskField.error = error.message
         TaskField.DESCRIPTION -> _binding.inputDescriptionTaskField.error = error.message
-        TaskField.DUE_DATE -> _binding.inpDueDateTaskField.error = error.message
+        TaskField.DUE_DATE -> {
+            _binding.inpDueDateTaskField.error = error.message
+            Snackbar.make(_binding.root, error.message, Snackbar.LENGTH_LONG).show()
+        }
     }
 
     private fun loadTask() = intent.getIntExtra(MainActivity.TASK_ID_KEY, 0).also {

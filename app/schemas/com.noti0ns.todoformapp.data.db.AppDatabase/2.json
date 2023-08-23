@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "f27233d9f290e870aa94b6e31047355b",
+    "identityHash": "2cf937bf0df3b87bc7bea4949198bc3b",
     "entities": [
       {
         "tableName": "Task",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `is_done` INTEGER NOT NULL, `date_created` TEXT NOT NULL, `date_updated` TEXT NOT NULL, `due_date` TEXT, `date_finished` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `is_done` INTEGER NOT NULL, `date_created` TEXT NOT NULL, `date_updated` TEXT, `due_date` TEXT, `date_finished` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -42,7 +42,7 @@
             "fieldPath": "dateUpdated",
             "columnName": "date_updated",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "dueDate",
@@ -70,7 +70,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f27233d9f290e870aa94b6e31047355b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2cf937bf0df3b87bc7bea4949198bc3b')"
     ]
   }
 }

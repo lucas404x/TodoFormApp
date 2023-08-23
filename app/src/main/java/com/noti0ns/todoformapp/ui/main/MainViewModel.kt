@@ -1,4 +1,4 @@
-package com.noti0ns.todoformapp.viewmodel
+package com.noti0ns.todoformapp.ui.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
-import com.noti0ns.todoformapp.interfaces.TaskRepository
+import com.noti0ns.todoformapp.data.repositories.TaskRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 

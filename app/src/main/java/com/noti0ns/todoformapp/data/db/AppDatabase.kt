@@ -1,18 +1,21 @@
 package com.noti0ns.todoformapp.data.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.noti0ns.todoformapp.MyApp
-import com.noti0ns.todoformapp.constants.Assets
 import com.noti0ns.todoformapp.data.db.converters.Converters
 import com.noti0ns.todoformapp.data.db.daos.*
 import com.noti0ns.todoformapp.data.models.Task
 
 @Database(
     entities = [Task::class],
-    version = 1
+    version = 2,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ]
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -26,8 +29,6 @@ abstract class AppDatabase : RoomDatabase() {
             MyApp.getInstance(),
             AppDatabase::class.java,
             "sample.db"
-        ).createFromAsset(
-            Assets.database
         ).build().also {
             instance = it
         }
