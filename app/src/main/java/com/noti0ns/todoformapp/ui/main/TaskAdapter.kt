@@ -36,7 +36,7 @@ class TaskAdapter(private val events: TaskClickEvent) :
         resetTileState(holder)
         val task = dataset[position]
         holder.binding.constraintLayout.apply {
-            setOnClickListener { events.onClickItem(task) }
+            setOnClickListener { events.onClickItem(task.id) }
             setOnLongClickListener {
                 events.onDeleteItem(position, task)
                 true
@@ -105,7 +105,7 @@ class TaskAdapter(private val events: TaskClickEvent) :
 
     interface TaskClickEvent {
         fun onCheckboxChanged(position: Int)
-        fun onClickItem(task: Task)
+        fun onClickItem(taskId: Int)
         fun onDeleteItem(position: Int, task: Task)
     }
 }

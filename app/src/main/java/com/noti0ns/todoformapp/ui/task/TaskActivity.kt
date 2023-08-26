@@ -35,10 +35,10 @@ class TaskActivity : AppCompatActivity() {
     private fun setupBindings() {
         _binding.apply {
             inpTitleTaskField.doOnTextChanged { text, _, _, _ ->
-                _viewModel.onInvokeEvent(TaskViewModel.TaskViewModelEvent.TitleChanged(text.toString()))
+                _viewModel.onTitleChanged(text.toString())
             }
             inputDescriptionTaskField.doOnTextChanged { text, _, _, _ ->
-                _viewModel.onInvokeEvent(TaskViewModel.TaskViewModelEvent.DescriptionChanged(text.toString()))
+                _viewModel.onDescriptionChanged(text.toString())
             }
             inpDueDateTaskField.doOnTextChanged { text, _, _, _ ->
                 _binding.btnClearDueDate.visibility =
@@ -48,10 +48,10 @@ class TaskActivity : AppCompatActivity() {
                 showDueDateDatePicker()
             }
             btnClearDueDate.setOnClickListener {
-                _viewModel.onInvokeEvent(TaskViewModel.TaskViewModelEvent.DueDateChanged(null))
+                _viewModel.onDueDateChanged(null)
             }
             btnSaveTaskChanges.setOnClickListener {
-                _viewModel.onInvokeEvent(TaskViewModel.TaskViewModelEvent.SubmitTask)
+                _viewModel.onSubmitTask()
             }
         }
     }
@@ -97,7 +97,7 @@ class TaskActivity : AppCompatActivity() {
             toInstant(),
             timeZone.toZoneId()
         )
-        _viewModel.onInvokeEvent(TaskViewModel.TaskViewModelEvent.DueDateChanged(selectedDueDate))
+        _viewModel.onDueDateChanged(selectedDueDate)
         reset()
     }
 
@@ -111,16 +111,21 @@ class TaskActivity : AppCompatActivity() {
                 }
 
                 is TaskViewModel.UIState.Loaded -> {
-                    _binding.progressBarTaskState.visibility = View.GONE
-                    _binding.btnSaveTaskChanges.isEnabled = true
+                    resetLockedUI()
                     _binding.inpTitleTaskField.setText(it.task.title)
                     _binding.inputDescriptionTaskField.setText(it.task.description)
                     _binding.inpDueDateTaskField.setText(it.task.dueDate.renderFullDateTime())
                     title = it.task.title.ifBlank { "Untitled" }
                 }
 
-                is TaskViewModel.UIState.SetFieldData<*> -> handleSetFieldData(it)
-                is TaskViewModel.UIState.Error -> handleFieldError(it)
+                is TaskViewModel.UIState.SetFieldData<*> -> {
+                    resetLockedUI()
+                    handleSetFieldData(it)
+                }
+                is TaskViewModel.UIState.Error -> {
+                    resetLockedUI()
+                    handleFieldError(it)
+                }
                 TaskViewModel.UIState.Finished -> {
                     setResult(MainActivity.REFRESH_SCREEN_CODE)
                     finish()
@@ -129,29 +134,32 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
+    private fun resetLockedUI() {
+        _binding.progressBarTaskState.visibility = View.GONE
+        _binding.btnSaveTaskChanges.isEnabled = true
+    }
+
     private fun handleSetFieldData(setFieldData: TaskViewModel.UIState.SetFieldData<*>) {
         when (setFieldData.field) {
             TaskViewModel.TaskField.TITLE -> {
-                if (setFieldData.data is String?) {
-                    title = setFieldData.data.orEmpty().ifBlank { "Untitled" }
-                }
+                val data = setFieldData.data as? String? ?: ""
+                title = data.ifBlank { "Untitled" }
             }
             TaskViewModel.TaskField.DESCRIPTION -> {}
             TaskViewModel.TaskField.DUE_DATE -> {
-                if (setFieldData.data is LocalDateTime?) {
-                    _binding.inpDueDateTaskField.setText((setFieldData.data.renderFullDateTime()))
-                    _binding.inpDueDateTaskField.error = null
-                }
+                val data = setFieldData.data as? LocalDateTime?
+                _binding.inpDueDateTaskField.setText((data.renderFullDateTime()))
+                _binding.inpDueDateTaskField.error = null
             }
         }
     }
 
-    private fun handleFieldError(error: TaskViewModel.UIState.Error) = when (error.field) {
-        TaskViewModel.TaskField.TITLE -> _binding.inpTitleTaskField.error = error.message
-        TaskViewModel.TaskField.DESCRIPTION -> _binding.inputDescriptionTaskField.error = error.message
-        TaskViewModel.TaskField.DUE_DATE -> {
-            _binding.inpDueDateTaskField.error = error.message
-            Snackbar.make(_binding.root, error.message, Snackbar.LENGTH_LONG).show()
+    private fun handleFieldError(error: TaskViewModel.UIState.Error) {
+        Snackbar.make(_binding.root, error.message, Snackbar.LENGTH_LONG).show()
+        when (error.field) {
+            TaskViewModel.TaskField.TITLE -> _binding.inpTitleTaskField.error = error.message
+            TaskViewModel.TaskField.DESCRIPTION -> _binding.inputDescriptionTaskField.error = error.message
+            TaskViewModel.TaskField.DUE_DATE ->  _binding.inpDueDateTaskField.error = error.message
         }
     }
 

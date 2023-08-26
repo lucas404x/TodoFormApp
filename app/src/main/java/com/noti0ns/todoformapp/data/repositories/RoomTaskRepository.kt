@@ -10,10 +10,6 @@ import javax.inject.Inject
 class RoomTaskRepository @Inject constructor(
     private val taskDao: TaskDao
 ) : TaskRepository {
-//    companion object {
-//        private val taskDao = AppDatabase.getInstance().taskDao()
-//    }
-
     override suspend fun get(id: Int): Task = withContext(Dispatchers.IO) {
         taskDao.get(id)
     }

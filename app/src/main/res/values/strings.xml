@@ -10,4 +10,5 @@
     <string name="txt_remove_task_dialog_body">You will remove the task named \"%1$s\".\n\nAre you sure?</string>
     <string name="txt_no">No</string>
     <string name="txt_yes">Yes</string>
+    <string name="txt_remove_task_dialog_title">Remove task</string>
 </resources>

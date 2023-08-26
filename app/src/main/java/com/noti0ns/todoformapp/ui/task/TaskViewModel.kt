@@ -8,6 +8,7 @@ import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
 import com.noti0ns.todoformapp.data.repositories.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,77 +17,72 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject internal constructor(
     private val taskRepository: TaskRepository
-): ViewModel() {
+) : ViewModel() {
     private var _task = Task()
 
     private val _uiState = MutableLiveData<UIState>(UIState.Initial)
     val uiState: LiveData<UIState> = _uiState
 
-    fun onLoadTask(taskId: Int) {
-        viewModelScope.launch {
-            taskRepository.get(taskId).also {
-                _uiState.value = UIState.Loading
-                _task = it
-                _uiState.value = UIState.Loaded(it)
-            }
-
+    fun onLoadTask(taskId: Int) = viewModelScope.launch {
+        taskRepository.get(taskId).also {
+            _uiState.value = UIState.Loading
+            _task = it
+            _uiState.value = UIState.Loaded(it)
         }
     }
 
-    fun onInvokeEvent(event: TaskViewModelEvent) = when (event) {
-        is TaskViewModelEvent.TitleChanged -> onTitleChanged(event.title)
-        is TaskViewModelEvent.DescriptionChanged -> onDescriptionChanged(event.description)
-        is TaskViewModelEvent.DueDateChanged -> onDueDateChanged(event.dueDate)
-        TaskViewModelEvent.SubmitTask -> onSubmitTask()
-    }
-
-    private fun onTitleChanged(title: String) {
+    fun onTitleChanged(title: String) {
         _task = _task.copy(title = title)
-        if (title.isBlank()) {
+        validateTitle(title)
+    }
+
+    private fun validateTitle(title: String): Boolean {
+        return if (title.isBlank()) {
             _uiState.value = UIState.Error("The title is required", TaskField.TITLE)
-        }
-        else {
+            false
+        } else {
             _uiState.value = UIState.SetFieldData(title, TaskField.TITLE)
+            true
         }
     }
 
-    private fun onDescriptionChanged(description: String?) {
+    fun onDescriptionChanged(description: String?) {
         _task = _task.copy(description = description)
         _uiState.value = UIState.SetFieldData(description, TaskField.DESCRIPTION)
     }
 
-    private fun onDueDateChanged(dueDate: LocalDateTime?) {
+    fun onDueDateChanged(dueDate: LocalDateTime?) {
         _task = _task.copy(dueDate = dueDate)
+        validateDueDate(dueDate)
+    }
+
+    private fun validateDueDate(dueDate: LocalDateTime?): Boolean {
         var errorMsg: String? = null
         dueDate?.let {
             if (it.toLocalDate() <= LocalDate.now()) {
                 errorMsg = "The Due Date must be greater than the current date."
             }
         }
-        _uiState.value = if (errorMsg == null) {
-            UIState.SetFieldData(dueDate, TaskField.DUE_DATE)
+        return if (errorMsg == null) {
+            _uiState.value = UIState.SetFieldData(dueDate, TaskField.DUE_DATE)
+            true
         } else {
-            UIState.Error(errorMsg!!, TaskField.DUE_DATE)
+            _uiState.value = UIState.Error(errorMsg!!, TaskField.DUE_DATE)
+            false
         }
     }
 
-    private fun onSubmitTask() {
-        viewModelScope.launch {
-            _uiState.value = UIState.Loading
-            if (_task.id == 0) {
-                taskRepository.save(_task)
-            } else {
-                taskRepository.update(_task)
-            }
-            _uiState.value = UIState.Finished
+    fun onSubmitTask() = viewModelScope.launch {
+        _uiState.value = UIState.Loading
+        if (!validateTitle(_task.title) || !validateDueDate(_task.dueDate)) {
+            return@launch
         }
-    }
-
-    sealed class TaskViewModelEvent {
-        data class TitleChanged(val title: String) : TaskViewModelEvent()
-        data class DescriptionChanged(val description: String) : TaskViewModelEvent()
-        data class DueDateChanged(val dueDate: LocalDateTime?) : TaskViewModelEvent()
-        object SubmitTask : TaskViewModelEvent()
+        if (_task.id == 0) {
+            taskRepository.save(_task)
+        } else {
+            taskRepository.update(_task)
+        }
+        _uiState.value = UIState.Finished
     }
 
     sealed class UIState {

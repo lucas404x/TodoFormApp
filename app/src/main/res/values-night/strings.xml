@@ -8,4 +8,5 @@
     <string name="char_space_between_texts">·</string>
     <string name="txt_empty_task_list">No tasks available.</string>
     <string name="txt_yes">Yes</string>
+    <string name="txt_remove_task_dialog_title">Remove task</string>
 </resources>

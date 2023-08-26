@@ -73,16 +73,16 @@ class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
         viewModel.toggleTaskState(position)
     }
 
-    override fun onClickItem(task: Task) {
+    override fun onClickItem(taskId: Int) {
         Intent(this, TaskActivity::class.java).also {
-            it.putExtra(TASK_ID_KEY, task.id)
+            it.putExtra(TASK_ID_KEY, taskId)
             getContent.launch(it)
         }
     }
 
     override fun onDeleteItem(position: Int, task: Task) {
         AlertDialog.Builder(this)
-            .setTitle("Remove task")
+            .setTitle(getString(R.string.txt_remove_task_dialog_title))
             .setMessage(getString(R.string.txt_remove_task_dialog_body, task.title))
             .setNegativeButton(getString(R.string.txt_no)) { _, _ -> }
             .setPositiveButton(getString(R.string.txt_yes)) { _, _ -> viewModel.deleteTask(position) }
