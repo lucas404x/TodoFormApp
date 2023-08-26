@@ -12,7 +12,9 @@ import com.noti0ns.todoformapp.R
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.databinding.ActivityMainBinding
 import com.noti0ns.todoformapp.ui.task.TaskActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), TaskAdapter.TaskClickEvent {
     companion object {
         const val TASK_ID_KEY = "EXTRA_TASK_ID"

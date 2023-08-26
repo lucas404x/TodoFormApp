@@ -1,5 +1,6 @@
 package com.noti0ns.todoformapp.data.db
 
+import android.content.Context
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
@@ -25,8 +26,8 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var instance: AppDatabase? = null
 
-        fun getInstance(): AppDatabase = instance ?: Room.databaseBuilder(
-            MyApp.getInstance(),
+        fun getInstance(context: Context): AppDatabase = instance ?: Room.databaseBuilder(
+            context,
             AppDatabase::class.java,
             "sample.db"
         ).build().also {

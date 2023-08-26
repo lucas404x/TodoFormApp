@@ -12,9 +12,11 @@ import com.noti0ns.todoformapp.databinding.ActivityTaskBinding
 import com.noti0ns.todoformapp.extensions.renderFullDateTime
 import com.noti0ns.todoformapp.extensions.reset
 import com.noti0ns.todoformapp.ui.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDateTime
 import java.util.Calendar
 
+@AndroidEntryPoint
 class TaskActivity : AppCompatActivity() {
     private val _viewModel: TaskViewModel by viewModels()
     private lateinit var _binding: ActivityTaskBinding

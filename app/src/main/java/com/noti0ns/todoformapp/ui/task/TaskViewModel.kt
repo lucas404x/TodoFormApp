@@ -7,29 +7,24 @@ import androidx.lifecycle.viewModelScope
 import com.noti0ns.todoformapp.data.models.Task
 import com.noti0ns.todoformapp.data.repositories.RoomTaskRepository
 import com.noti0ns.todoformapp.data.repositories.TaskRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class TaskViewModel : ViewModel() {
-    companion object {
-        private val _taskRepo: TaskRepository
-
-        init {
-            _taskRepo = RoomTaskRepository()
-        }
-    }
-
+@HiltViewModel
+class TaskViewModel @Inject internal constructor(
+    private val taskRepository: TaskRepository
+): ViewModel() {
     private var _task = Task()
 
     private val _uiState = MutableLiveData<UIState>(UIState.Initial)
     val uiState: LiveData<UIState> = _uiState
 
-
-
     fun onLoadTask(taskId: Int) {
         viewModelScope.launch {
-            _taskRepo.get(taskId).also {
+            taskRepository.get(taskId).also {
                 _uiState.value = UIState.Loading
                 _task = it
                 _uiState.value = UIState.Loaded(it)
@@ -79,9 +74,9 @@ class TaskViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = UIState.Loading
             if (_task.id == 0) {
-                _taskRepo.save(_task)
+                taskRepository.save(_task)
             } else {
-                _taskRepo.update(_task)
+                taskRepository.update(_task)
             }
             _uiState.value = UIState.Finished
         }
